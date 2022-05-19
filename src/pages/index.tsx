@@ -25,13 +25,13 @@ const Home: NextPage = () => {
       <Paper className={classes.container} elevation={0} square={true}>
         <Box className={classes.content}>
           <Typography variant="h4" sx={{ mb: 10 }}>
-            Semaphore On-chain group
+            Semaphore On-chain NFT group
           </Typography>
 
-          <Grid container spacing={8} justifyContent="center">
+          <Grid container spacing={10} justifyContent="center">
             {groupList.map((group) => (
               <Grid item xs={3}>
-                <Thumbnail groupName={group.groupName} />
+                <Thumbnail groupName={group.groupName} imgSrc={group.imgSrc} />
               </Grid>
             ))}
             <Grid item xs={3}>
@@ -39,7 +39,7 @@ const Home: NextPage = () => {
                 <Tooltip title="Create group" placement="bottom">
                   <Button
                     // onClick={() => router.push("/admin")}
-                    sx={{ width: 150, height: 150, color: "gray" }}
+                    sx={{ width: 150, height: 150, color: "gray", border: 1 }}
                   >
                     <AddBoxIcon sx={{ width: 150, height: 150 }} />
                   </Button>
