@@ -38,7 +38,7 @@ export default function NavBar(): JSX.Element {
     <AppBar position="static" color="primary">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <Button onClick={() => router.push("/")} sx={{marginRight:10}}>
+          <Button onClick={() => router.push("/")} sx={{ marginRight: 10 }}>
             <Box sx={{ width: 50 }}>
               <Image
                 src={logo}
@@ -49,7 +49,7 @@ export default function NavBar(): JSX.Element {
           </Button>
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
             <Button
-              //   onClick={() => router.push("/admin")}
+              onClick={() => router.push("/admin")}
               sx={{ my: 2, color: "white", display: "block", marginRight: 1 }}
             >
               Create Group

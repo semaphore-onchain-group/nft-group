@@ -38,7 +38,7 @@ const Home: NextPage = () => {
               <Container>
                 <Tooltip title="Create group" placement="bottom">
                   <Button
-                    // onClick={() => router.push("/admin")}
+                    onClick={() => router.push("/admin")}
                     sx={{ width: 150, height: 150, color: "gray", border: 1 }}
                   >
                     <AddBoxIcon sx={{ width: 150, height: 150 }} />
