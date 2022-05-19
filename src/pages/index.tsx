@@ -9,9 +9,9 @@ import {
   Button,
   Tooltip
 } from "@mui/material"
-import { useStyles, theme } from "../styles"
-import Thumbnail from "../components/Thumbnail"
-import getGroupList from "../hooks/getGroupList"
+import { useStyles, theme } from "src/styles"
+import Thumbnail from "src/components/Thumbnail"
+import getGroupList from "src/hooks/getGroupList"
 import AddBoxIcon from "@mui/icons-material/AddBox"
 import { useRouter } from "next/router"
 
@@ -30,8 +30,8 @@ const Home: NextPage = () => {
 
           <Grid container spacing={10} justifyContent="center">
             {groupList.map((group) => (
-              <Grid item xs={3}>
-                <Thumbnail groupName={group.groupName} imgSrc={group.imgSrc} />
+              <Grid key={group.index} item xs={3}>
+                <Thumbnail index={group.index} groupName={group.groupName} imgSrc={group.imgSrc} />
               </Grid>
             ))}
             <Grid item xs={3}>
