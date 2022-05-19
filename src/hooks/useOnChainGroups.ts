@@ -6,11 +6,7 @@ import onchainAPI from "./OnchainAPI"
 import getNextConfig from "next/config"
 import { generateMerkleProof } from "@zk-kit/protocols"
 import { HashZero } from "@ethersproject/constants"
-import {
-  toUtf8Bytes,
-  concat,
-  hexlify,
-} from "ethers/lib/utils"
+import { toUtf8Bytes, concat, hexlify } from "ethers/lib/utils"
 import { Bytes31 } from "soltypes"
 
 function formatUint248String(text: string): string {
@@ -66,7 +62,6 @@ export default function useOnChainGroups(): ReturnParameters {
       setLoading(true)
 
       const groupId = formatUint248String(groupName)
-      console.log(groupId)
 
       const transaction = await SemaphoreContract.connect(
         adminWallet
@@ -103,7 +98,6 @@ export default function useOnChainGroups(): ReturnParameters {
   const retrieveIdentityCommitment = useCallback(
     async (signer: Signer): Promise<string | null> => {
       setLoading(true)
-      console.log(adminWallet)
 
       const identity = await createIdentity(
         (message) => signer.signMessage(message),
