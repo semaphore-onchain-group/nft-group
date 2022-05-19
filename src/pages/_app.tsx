@@ -2,14 +2,12 @@ import "../styles/globals.css"
 import type { AppProps } from "next/app"
 import Head from "next/head"
 import { Web3ReactProvider } from "@web3-react/core"
-import { ThemeProvider } from '@mui/material/styles'
-import theme from "../styles/theme"
+import { ThemeProvider } from "@mui/material/styles"
+import { theme } from "../styles"
 import NavBar from "../components/NavBar"
 import { providers } from "ethers"
 
-
 function MyApp({ Component, pageProps }: AppProps) {
-
   function getLibrary(provider: any) {
     return new providers.Web3Provider(provider)
   }

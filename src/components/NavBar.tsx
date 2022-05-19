@@ -1,5 +1,6 @@
 import React, { useEffect } from "react"
 import { useRouter } from "next/router"
+import Image from "next/image"
 import AppBar from "@mui/material/AppBar"
 import Container from "@mui/material/Container"
 import Toolbar from "@mui/material/Toolbar"
@@ -8,6 +9,7 @@ import Button from "@mui/material/Button"
 import Link from "@mui/material/Link"
 import shortenAddress from "../utils/shortenAddress"
 import Tooltip from "@mui/material/Tooltip"
+import logo from "../img/logo.png"
 
 import { useWeb3React } from "@web3-react/core"
 import { InjectedConnector } from "@web3-react/injected-connector"
@@ -36,15 +38,18 @@ export default function NavBar(): JSX.Element {
     <AppBar position="static" color="primary">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <Box
-            sx={{ width: 100, marginRight: 5, marginLeft: 2 }}
-            onClick={() => router.push("/")}
-          >
-            Logo
-          </Box>
+          <Button onClick={() => router.push("/")} sx={{marginRight:10}}>
+            <Box sx={{ width: 50 }}>
+              <Image
+                src={logo}
+                alt="Semaphore Onchain group"
+                layout="responsive"
+              />
+            </Box>
+          </Button>
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
             <Button
-            //   onClick={() => router.push("/admin")}
+              //   onClick={() => router.push("/admin")}
               sx={{ my: 2, color: "white", display: "block", marginRight: 1 }}
             >
               Create Group
@@ -74,7 +79,7 @@ export default function NavBar(): JSX.Element {
         </Toolbar>
       </Container>
       <Link
-        href="https://github.com/dvlprsh/brightid-onchain-demo"
+        href="https://github.com/semaphore-onchain-group/nft-group"
         sx={{
           color: "black",
           fill: "white",
