@@ -3,9 +3,9 @@ const nextConfig = {
   reactStrictMode: true,
   publicRuntimeConfig: {
     // Will be available on both server and client
-    adminprivatekey: process.env.BRIGHTID_GROUP_ADMIN_PRIVATE_KEY,
+    adminprivatekey_1: process.env.GROUP_ADMIN_PRIVATE_KEY_1,
     infuraApiKey: process.env.INFURA_API_KEY,
-    brightIdApiKey: process.env.BRIGHTID_API_PRIVATE_KEY,
+    alchemyKey: process.env.ALCHEMY_APIKEY,
   },
   webpack: (config, { isServer, webpack }) => {
     if (!isServer) {
