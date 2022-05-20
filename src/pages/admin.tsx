@@ -14,25 +14,40 @@ import {
   MenuItem,
   Link
 } from "@mui/material"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useStyles } from "src/styles"
 import Select, { SelectChangeEvent } from "@mui/material/Select"
 import useOnChainGroups from "src/hooks/useOnChainGroups"
+import { useWeb3React } from "@web3-react/core"
+import { providers } from "ethers"
 import { useRouter } from "next/router"
+import getUsersNFT from "src/hooks/getUsersNFT"
 
 const Admin: NextPage = () => {
   const classes = useStyles()
   const router = useRouter()
-
+  const { account } = useWeb3React<providers.Web3Provider>()
   const [_activeStep, setActiveStep] = useState<number>(0)
   const [_error, setError] = useState<
     { errorStep: number; message?: string } | undefined
   >()
   const [nftName, setNftName] = useState<string>("")
-
   const { createNftGroup, loading, etherscanLink, transactionstatus } =
     useOnChainGroups()
-
+  const { usersNftList } = getUsersNFT()
+  const [_nftlist, setNftList] = useState<string[]>([])
+  useEffect(() => {
+    ;(async () => {
+      setError(undefined)
+      if (_activeStep === 0 && account) {
+        const nftlist = await usersNftList(account)
+        if(nftlist){
+        setNftList(nftlist)
+        }
+      }
+    })()
+  }, [_activeStep, account])
+  
   function handleNext() {
     setActiveStep((prevActiveStep: number) => prevActiveStep + 1)
     setError(undefined)
@@ -82,7 +97,15 @@ const Admin: NextPage = () => {
             </StepContent>
           </Step>
           <Step>
-            <StepLabel error={_error?.errorStep === 2}>Create Group</StepLabel>
+            <StepLabel error={_error?.errorStep === 2}>Select Group Admin</StepLabel>
+            <StepContent style={{ width: 400 }}>
+              <Box>
+                <Button variant="outlined" onClick={handleNext}>Admin1</Button>
+              </Box>
+            </StepContent>
+          </Step>
+          <Step>
+            <StepLabel error={_error?.errorStep === 3}>Create Group</StepLabel>
             <StepContent style={{ width: 400 }}>
               {transactionstatus !== undefined ? (
                 <Box>

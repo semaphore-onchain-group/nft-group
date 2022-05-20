@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback } from "react"
 import getNextConfig from "next/config"
 import { createAlchemyWeb3 } from "@alch/alchemy-web3"
 
@@ -11,6 +11,7 @@ type ReturnParameters = {
 
 export default function getUsersNFT(): ReturnParameters {
 
+    //add DB to find existing group
     const usersNftList = useCallback(
         async (account: string): Promise<string[] | null> => {
             const nfts = await web3.alchemy.getNfts({owner: account})
