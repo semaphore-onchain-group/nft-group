@@ -31,7 +31,7 @@ const Admin: NextPage = () => {
   const [_error, setError] = useState<
     { errorStep: number; message?: string } | undefined
   >()
-  const [nftName, setNftName] = useState<string>("")
+  const [_nftName, setNftName] = useState<string>("")
   const { createNftGroup, loading, etherscanLink, transactionstatus } =
     useOnChainGroups()
   const { usersNftList } = getUsersNFT()
@@ -41,13 +41,13 @@ const Admin: NextPage = () => {
       setError(undefined)
       if (_activeStep === 0 && account) {
         const nftlist = await usersNftList(account)
-        if(nftlist){
-        setNftList(nftlist)
+        if (nftlist) {
+          setNftList(nftlist)
         }
       }
     })()
   }, [_activeStep, account])
-  
+
   function handleNext() {
     setActiveStep((prevActiveStep: number) => prevActiveStep + 1)
     setError(undefined)
@@ -58,12 +58,15 @@ const Admin: NextPage = () => {
     handleNext()
   }
 
-  const createGroup =async () => {
-      try {
-        await createNftGroup(nftName)
-      } catch (e) {
-        setError({ errorStep: _activeStep, message: "create group Failed - " + e })
-      }
+  const createGroup = async () => {
+    try {
+      await createNftGroup(_nftName)
+    } catch (e) {
+      setError({
+        errorStep: _activeStep,
+        message: "create group Failed - " + e
+      })
+    }
   }
 
   return (
@@ -82,25 +85,26 @@ const Admin: NextPage = () => {
             <StepLabel error={_error?.errorStep === 1}>Select NFT</StepLabel>
             <StepContent style={{ width: 400 }}>
               <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }}>
-                <InputLabel>
-                  Select NFT
-                </InputLabel>
-                <Select
-                  value={nftName}
-                  onChange={handleSelect}
-                >
-                  <MenuItem value={"nft1"}>NFT1</MenuItem>
-                  <MenuItem value={"nft2"}>NFT2</MenuItem>
-                  <MenuItem value={"nft3"}>NFT3</MenuItem>
+                <InputLabel>Select NFT</InputLabel>
+                <Select value={_nftName} onChange={handleSelect}>
+                  {_nftlist.map((nft) => (
+                    <MenuItem value={nft} key={nft}>
+                      {nft}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </StepContent>
           </Step>
           <Step>
-            <StepLabel error={_error?.errorStep === 2}>Select Group Admin</StepLabel>
+            <StepLabel error={_error?.errorStep === 2}>
+              Select Group Admin
+            </StepLabel>
             <StepContent style={{ width: 400 }}>
               <Box>
-                <Button variant="outlined" onClick={handleNext}>Admin1</Button>
+                <Button variant="outlined" onClick={handleNext}>
+                  Admin1
+                </Button>
               </Box>
             </StepContent>
           </Step>
@@ -122,7 +126,11 @@ const Admin: NextPage = () => {
                     </Link>
                     )
                   </Typography>
-                  <Button fullWidth variant="outlined" onClick={() => router.push("/")}>
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    onClick={() => router.push("/")}
+                  >
                     Home
                   </Button>
                 </Box>
