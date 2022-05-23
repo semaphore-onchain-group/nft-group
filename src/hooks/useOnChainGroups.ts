@@ -10,6 +10,8 @@ import { toUtf8Bytes, concat, hexlify } from "ethers/lib/utils"
 import { Bytes31 } from "soltypes"
 import useGroupAdmin from "./useGroupAdmin"
 import { Nft } from "@alch/alchemy-web3"
+import request from "./request"
+import { AxiosRequestConfig } from "axios"
 
 function formatUint248String(text: string): string {
   const bytes = toUtf8Bytes(text)
@@ -75,6 +77,21 @@ export default function useOnChainGroups(): ReturnParameters {
       ).createGroup(groupId, DEPTH, adminWallet.address)
 
       const receipt = await provider.waitForTransaction(transaction.hash)
+
+      if (!!receipt.status) {
+        // Todo: add thumbnailImg
+        const config: AxiosRequestConfig = {
+          method: "post",
+          data: {
+            name: nft.title,
+            thumbnailImg: "",
+            contract: nft.contract,
+            isPOH: groupType === "poh"
+          }
+        }
+
+        await request("/api/groups", config)
+      }
 
       setTransactionStatus(!!receipt.status)
 
