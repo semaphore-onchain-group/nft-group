@@ -85,7 +85,7 @@ export default function useOnChainGroups(): ReturnParameters {
           data: {
             name: nft.title,
             thumbnailImg: "",
-            contract: nft.contract,
+            contract: nft.contract.address,
             isPOH: groupType === "poh"
           }
         }
