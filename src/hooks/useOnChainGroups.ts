@@ -67,7 +67,7 @@ export default function useOnChainGroups(): ReturnParameters {
 
       setLoading(true)
 
-      const groupId = formatUint248String(groupName)
+      const groupId = formatUint248String(groupName + groupType + "_group")
 
       const transaction = await SemaphoreContract.connect(
         adminWallet

@@ -17,7 +17,14 @@ export default function getUsersNFT(): ReturnParameters {
             const nfts = await web3.alchemy.getNfts({owner: account})
             const nftList = []
             for(const nft of nfts.ownedNfts){
-              nftList.push(nft.title)
+                if (nft.title.includes("#")) {
+                    const nftName = nft.title.substring(0,nft.title.indexOf("#"))
+                    nftList.push(nftName)
+                } else if (nft.title.length < 2) {
+                    nftList.push()
+                } else {
+                    nftList.push(nft.title)
+                }
             }
             return nftList
         },[]
