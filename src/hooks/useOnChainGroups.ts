@@ -9,6 +9,7 @@ import { HashZero } from "@ethersproject/constants"
 import { toUtf8Bytes, concat, hexlify } from "ethers/lib/utils"
 import { Bytes31 } from "soltypes"
 import useGroupAdmin from "./useGroupAdmin"
+import { Nft } from "@alch/alchemy-web3"
 
 function formatUint248String(text: string): string {
   const bytes = toUtf8Bytes(text)
@@ -38,7 +39,7 @@ const adminWallet = ADMIN && new Wallet(ADMIN, provider)
 const DEPTH = 20
 
 type ReturnParameters = {
-  createNftGroup: (groupName: string, groupType: string) => Promise<true | null>
+  createNftGroup: (nft: Nft, groupType: string) => Promise<true | null>
   signMessage: (signer: Signer, message: string) => Promise<string | null>
   retrieveIdentityCommitment: (signer: Signer, groupId: string) => Promise<string | null>
   joinGroup: (groupId: string, identityCommitment: string) => Promise<true | null>
@@ -58,7 +59,7 @@ export default function useOnChainGroups(): ReturnParameters {
   const [_hasjoined, setHasjoined] = useState<boolean>(false)
 
   const createNftGroup = useCallback(
-    async (groupName: string, groupType: string): Promise<true | null> => {
+    async (nft: Nft, groupType: string): Promise<true | null> => {
       const adminWallet = await getGroupAdmin(groupType).then((wallet) => {
         return wallet
       })
@@ -67,7 +68,7 @@ export default function useOnChainGroups(): ReturnParameters {
 
       setLoading(true)
 
-      const groupId = formatUint248String(groupName + groupType + "_group")
+      const groupId = formatUint248String(nft.title + groupType + "_group")
 
       const transaction = await SemaphoreContract.connect(
         adminWallet

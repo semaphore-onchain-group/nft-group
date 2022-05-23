@@ -22,6 +22,7 @@ import { useWeb3React } from "@web3-react/core"
 import { providers } from "ethers"
 import { useRouter } from "next/router"
 import getUsersNFT from "src/hooks/getUsersNFT"
+import { Nft } from "@alch/alchemy-web3"
 
 const Admin: NextPage = () => {
   const classes = useStyles()
@@ -34,11 +35,11 @@ const Admin: NextPage = () => {
   const [_error, setError] = useState<
     { errorStep: number; message?: string } | undefined
   >()
-  const [_nftName, setNftName] = useState<string>("")
-  const [_nftlist, setNftList] = useState<string[]>([])
+  const [_nft, setNft] = useState<Nft>()
+  const [_nftlist, setNftList] = useState<Nft[]>([])
   const [_groupType, setGroupType] = useState<string>("")
   useEffect(() => {
-    ;(async () => {
+    ; (async () => {
       setError(undefined)
       if (_activeStep === 0 && account) {
         const nftlist = await usersNftList(account)
@@ -55,7 +56,8 @@ const Admin: NextPage = () => {
   }
 
   const selectNft = (event: SelectChangeEvent) => {
-    setNftName(event.target.value)
+    const idx = Number(event.target.value)
+    setNft(_nftlist[idx])
     handleNext()
   }
 
@@ -66,7 +68,7 @@ const Admin: NextPage = () => {
 
   const createGroup = async () => {
     try {
-      await createNftGroup(_nftName, _groupType)
+      _nft && await createNftGroup(_nft, _groupType)
     } catch (e) {
       setError({
         errorStep: _activeStep,
@@ -92,10 +94,10 @@ const Admin: NextPage = () => {
             <StepContent style={{ width: 400 }}>
               <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }}>
                 <InputLabel>Select NFT</InputLabel>
-                <Select value={_nftName} onChange={selectNft}>
-                  {_nftlist.map((nft) => (
-                    <MenuItem value={nft} key={nft}>
-                      {nft}
+                <Select value={_nft?.title || ''} onChange={selectNft}>
+                  {_nftlist.map((nft, idx) => (
+                    <MenuItem value={idx} key={nft.title}>
+                      {nft.title}
                     </MenuItem>
                   ))}
                 </Select>
@@ -143,15 +145,15 @@ const Admin: NextPage = () => {
                   </Button>
                 </Box>
               ) : (
-                <LoadingButton
-                  fullWidth
-                  onClick={createGroup}
-                  variant="outlined"
-                  loading={loading}
-                >
-                  Create Group
-                </LoadingButton>
-              )}
+                  <LoadingButton
+                    fullWidth
+                    onClick={createGroup}
+                    variant="outlined"
+                    loading={loading}
+                  >
+                    Create Group
+                  </LoadingButton>
+                )}
             </StepContent>
           </Step>
         </Stepper>
