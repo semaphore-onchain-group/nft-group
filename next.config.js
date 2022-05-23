@@ -3,7 +3,8 @@ const nextConfig = {
   reactStrictMode: true,
   publicRuntimeConfig: {
     // Will be available on both server and client
-    adminprivatekey_1: process.env.GROUP_ADMIN_PRIVATE_KEY_1,
+    generalAdminPrivateKey: process.env.GENERAL_NFT_GROUP_ADMIN_PRIVATE_KEY,
+    pohAdminPrivateKey: process.env.POH_NFT_GROUP_ADMIN_PRIVATE_KEY,
     infuraApiKey: process.env.INFURA_API_KEY,
     alchemyKey: process.env.ALCHEMY_APIKEY,
     mongoURL: process.env.MONGO_URL,

@@ -8,6 +8,7 @@ import { generateMerkleProof } from "@zk-kit/protocols"
 import { HashZero } from "@ethersproject/constants"
 import { toUtf8Bytes, concat, hexlify } from "ethers/lib/utils"
 import { Bytes31 } from "soltypes"
+import useGroupAdmin from "./useGroupAdmin"
 
 function formatUint248String(text: string): string {
   const bytes = toUtf8Bytes(text)
@@ -37,7 +38,7 @@ const adminWallet = ADMIN && new Wallet(ADMIN, provider)
 const DEPTH = 20
 
 type ReturnParameters = {
-  createNftGroup: (groupName: string) => Promise<true | null>
+  createNftGroup: (groupName: string, groupType: string) => Promise<true | null>
   signMessage: (signer: Signer, message: string) => Promise<string | null>
   retrieveIdentityCommitment: (signer: Signer, groupId: string) => Promise<string | null>
   joinGroup: (groupId: string, identityCommitment: string) => Promise<true | null>
@@ -50,13 +51,18 @@ type ReturnParameters = {
 }
 
 export default function useOnChainGroups(): ReturnParameters {
+  const { getGroupAdmin } = useGroupAdmin()
   const [_loading, setLoading] = useState<boolean>(false)
   const [_link, setEtherscanLink] = useState<string>()
   const [_transactionStatus, setTransactionStatus] = useState<boolean>()
   const [_hasjoined, setHasjoined] = useState<boolean>(false)
 
   const createNftGroup = useCallback(
-    async (groupName: string): Promise<true | null> => {
+    async (groupName: string, groupType: string): Promise<true | null> => {
+      const adminWallet = await getGroupAdmin(groupType).then((wallet) => {
+        return wallet
+      })
+      
       if (!adminWallet) return null
 
       setLoading(true)
@@ -73,6 +79,7 @@ export default function useOnChainGroups(): ReturnParameters {
 
       setEtherscanLink("https://kovan.etherscan.io/tx/" + transaction.hash)
       setLoading(false)
+
       return true
     },
     []

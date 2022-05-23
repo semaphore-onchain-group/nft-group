@@ -27,15 +27,16 @@ const Admin: NextPage = () => {
   const classes = useStyles()
   const router = useRouter()
   const { account } = useWeb3React<providers.Web3Provider>()
+  const { createNftGroup, loading, etherscanLink, transactionstatus } =
+    useOnChainGroups()
+  const { usersNftList } = getUsersNFT()
   const [_activeStep, setActiveStep] = useState<number>(0)
   const [_error, setError] = useState<
     { errorStep: number; message?: string } | undefined
   >()
   const [_nftName, setNftName] = useState<string>("")
-  const { createNftGroup, loading, etherscanLink, transactionstatus } =
-    useOnChainGroups()
-  const { usersNftList } = getUsersNFT()
   const [_nftlist, setNftList] = useState<string[]>([])
+  const [_groupType, setGroupType] = useState<string>("")
   useEffect(() => {
     ;(async () => {
       setError(undefined)
@@ -53,14 +54,19 @@ const Admin: NextPage = () => {
     setError(undefined)
   }
 
-  const handleSelect = (event: SelectChangeEvent) => {
+  const selectNft = (event: SelectChangeEvent) => {
     setNftName(event.target.value)
+    handleNext()
+  }
+
+  const selectGroupType = (event: SelectChangeEvent) => {
+    setGroupType(event.target.value)
     handleNext()
   }
 
   const createGroup = async () => {
     try {
-      await createNftGroup(_nftName)
+      await createNftGroup(_nftName, _groupType)
     } catch (e) {
       setError({
         errorStep: _activeStep,
@@ -86,7 +92,7 @@ const Admin: NextPage = () => {
             <StepContent style={{ width: 400 }}>
               <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }}>
                 <InputLabel>Select NFT</InputLabel>
-                <Select value={_nftName} onChange={handleSelect}>
+                <Select value={_nftName} onChange={selectNft}>
                   {_nftlist.map((nft) => (
                     <MenuItem value={nft} key={nft}>
                       {nft}
@@ -98,14 +104,16 @@ const Admin: NextPage = () => {
           </Step>
           <Step>
             <StepLabel error={_error?.errorStep === 2}>
-              Select Group Admin
+              Select Type of the Group
             </StepLabel>
             <StepContent style={{ width: 400 }}>
-              <Box>
-                <Button variant="outlined" onClick={handleNext}>
-                  Admin1
-                </Button>
-              </Box>
+              <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }}>
+                <InputLabel>NFT Type</InputLabel>
+                <Select value={_groupType} onChange={selectGroupType}>
+                  <MenuItem value="general">General NFT</MenuItem>
+                  <MenuItem value="poh">PoH(Proof of Humanity)</MenuItem>
+                </Select>
+              </FormControl>
             </StepContent>
           </Step>
           <Step>
