@@ -9,10 +9,11 @@ const web3 = createAlchemyWeb3(
 
 type ReturnParameters = {
   usersNftList: (account: string) => Promise<Nft[] | null>
+  checkUsersStatus: (account: string, grouptype: string ,nft: Nft) => Promise<boolean | null>
 }
 
 export default function getUsersNFT(): ReturnParameters {
-  //add DB to find existing group
+  // Todo: add DB to find existing group
   const usersNftList = useCallback(
     async (account: string): Promise<Nft[] | null> => {
       const nfts = await web3.alchemy.getNfts({ owner: account })
@@ -32,7 +33,36 @@ export default function getUsersNFT(): ReturnParameters {
     []
   )
 
+  const checkUsersStatus = useCallback(
+    async (account: string, grouptype: string , nft: Nft): Promise<boolean | null> => {
+    if(grouptype === "poh")
+      {
+        const minted = await web3.alchemy.getAssetTransfers({
+          fromBlock: "0x0",
+          fromAddress: "0x0000000000000000000000000000000000000000",
+          toAddress: account,
+          contractAddresses:[nft.contract.address],
+          excludeZeroValue: true
+        })
+
+        return !!minted.transfers.length
+      }
+    //General nft time Holding check at least one day before the current time  
+    else
+      {
+        const timestamp = (new Date(nft.timeLastUpdated)).getTime()
+        const timespend_sec = Math.floor((Date.now() - timestamp)/1000)
+        if(timespend_sec > 86400){
+          return true
+        }else{
+          return false
+        }
+      }
+    },[]
+  )
+
   return {
-    usersNftList
+    usersNftList,
+    checkUsersStatus
   }
 }
