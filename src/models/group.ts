@@ -2,7 +2,7 @@ import mongoose from "mongoose"
 
 const { Schema } = mongoose
 
-interface IGroup {
+export interface IGroup {
   name: string
   thumbnailImg: string
   contract: string
