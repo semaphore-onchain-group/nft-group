@@ -3,6 +3,7 @@ import mongoose from "mongoose"
 const { Schema } = mongoose
 
 export interface IGroup {
+  groupId: string
   name: string
   thumbnailImg: string
   contract: string
@@ -11,6 +12,7 @@ export interface IGroup {
 }
 
 const GroupSchema = new Schema<IGroup>({
+  groupId: String,
   name: String,
   thumbnailImg: String,
   contract: String,

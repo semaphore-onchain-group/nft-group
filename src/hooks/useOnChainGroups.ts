@@ -72,12 +72,11 @@ export default function useOnChainGroups(): ReturnParameters {
         const config: AxiosRequestConfig = {
           method: "post",
           data: {
-            name: nft.title.includes("#")
-            ? nft.title.substring(0, nft.title.indexOf("#"))
-            : nft.title,
+            name: nft.title,
             thumbnailImg: img_url,
             contract: nft.contract.address,
-            isPOH: groupType === "poh"
+            isPOH: groupType === "poh",
+            groupId,
           }
         }
         
