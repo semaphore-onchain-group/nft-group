@@ -22,17 +22,14 @@ const SemaphoreContract = new Contract(
   provider
 )
 
-const ADMIN = getNextConfig().publicRuntimeConfig.adminprivatekey_1
-const adminWallet = ADMIN && new Wallet(ADMIN, provider)
-//add multiple admin wallet
 const DEPTH = 20
 
 type ReturnParameters = {
   createNftGroup: (nft: Nft, groupType: string) => Promise<true | null>
   signMessage: (signer: Signer, message: string) => Promise<string | null>
   retrieveIdentityCommitment: (signer: Signer, groupId: string) => Promise<string | null>
-  joinGroup: (groupId: string, identityCommitment: string) => Promise<true | null>
-  leaveGroup: (groupId: string, identityCommitment: string) => Promise<true | null>
+  joinGroup: (groupId: string, groupType: string, identityCommitment: string) => Promise<true | null>
+  leaveGroup: (groupId: string, groupType: string, identityCommitment: string) => Promise<true | null>
   memberCount: (groupId: string) => Promise<number | null>
   etherscanLink?: string
   transactionstatus?: boolean
@@ -141,7 +138,11 @@ export default function useOnChainGroups(): ReturnParameters {
   )
 
   const joinGroup = useCallback(
-    async (groupId: string, identityCommitment: string): Promise<true | null> => {
+    async (groupId: string, groupType: string, identityCommitment: string): Promise<true | null> => {
+      const adminWallet = await getGroupAdmin(groupType).then((wallet) => {
+        return wallet
+      })
+      
       if (!adminWallet) return null
 
       setLoading(true)
@@ -165,7 +166,11 @@ export default function useOnChainGroups(): ReturnParameters {
   )
 
   const leaveGroup = useCallback(
-    async (groupId: string, IdentityCommitment: string): Promise<true | null> => {
+    async (groupId: string, groupType: string, IdentityCommitment: string): Promise<true | null> => {
+      const adminWallet = await getGroupAdmin(groupType).then((wallet) => {
+        return wallet
+      })
+      
       if (!adminWallet) return null
 
       setLoading(true)
