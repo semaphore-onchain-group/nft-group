@@ -6,7 +6,13 @@ export const write = async (req: NextApiRequest, res: NextApiResponse) => {
   await connectToDatabase()
   const group = new Group(req.body)
 
-  await group.save()
+  try {
+    await group.save()
+
+    res.status(200).end()
+  } catch (e) {
+    res.status(500).end()
+  }
 }
 
 export const list = async (req: NextApiRequest, res: NextApiResponse) => {
