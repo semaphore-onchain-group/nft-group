@@ -14,24 +14,40 @@ import Thumbnail from "src/components/Thumbnail"
 import getGroupList from "src/hooks/getGroupList"
 import AddBoxIcon from "@mui/icons-material/AddBox"
 import { useRouter } from "next/router"
+import { useEffect, useState } from "react"
+import { GroupType } from "src/types/group"
 
 const Home: NextPage = () => {
   const router = useRouter()
   const classes = useStyles()
-  const groupList = getGroupList()
+  const [_groupList, setGroupList] = useState<GroupType[]>([])
+
+  useEffect(() => {
+    ;(async () => {
+      const groupList = await getGroupList()
+      setGroupList(groupList)
+    })()
+  }, [])
 
   return (
     <ThemeProvider theme={theme}>
       <Paper className={classes.container} elevation={0} square={true}>
         <Box className={classes.content}>
-          <Typography variant="h4" sx={{ mb: 10 }}>
+          <Typography variant="h4" sx={{ mt: 10, mb: 10 }}>
             Semaphore On-chain NFT group
           </Typography>
 
-          <Grid container spacing={10} justifyContent="center">
-            {groupList.map((group) => (
-              <Grid key={group.index} item xs={3}>
-                <Thumbnail index={group.index} groupName={group.groupName} imgSrc={group.imgSrc} />
+          <Grid container spacing={10}>
+            {_groupList.map((group) => (
+              <Grid key={group.groupId} item xs={3}>
+                <Thumbnail
+                  groupId={group.groupId}
+                  name={group.name}
+                  thumbnailImg={group.thumbnailImg}
+                  contract={group.contract}
+                  memberCount={group.memberCount}
+                  isPOH={group.isPOH}
+                />
               </Grid>
             ))}
             <Grid item xs={3}>
