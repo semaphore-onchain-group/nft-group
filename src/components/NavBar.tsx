@@ -14,6 +14,7 @@ import logo from "src/img/logo.png"
 import { useWeb3React } from "@web3-react/core"
 import { InjectedConnector } from "@web3-react/injected-connector"
 import { providers } from "ethers"
+import { Typography } from "@mui/material"
 
 const injectedConnector = new InjectedConnector({
   supportedChainIds: [1, 3, 4, 5, 42]
@@ -38,7 +39,7 @@ export default function NavBar(): JSX.Element {
     <AppBar position="static" color="primary">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <Button onClick={() => router.push("/")} sx={{ marginRight: 10 }}>
+          <Button onClick={() => router.push("/")} >
             <Box sx={{ width: 50 }}>
               <Image
                 src={logo}
@@ -46,36 +47,33 @@ export default function NavBar(): JSX.Element {
                 layout="responsive"
               />
             </Box>
+            <Typography sx={{color:"white"}}>
+              Semaphore NFT Group
+            </Typography>
           </Button>
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            <Button
-              onClick={() => router.push("/admin")}
-              sx={{ my: 2, color: "white", display: "block", marginRight: 1 }}
-            >
-              Create Group
-            </Button>
-          </Box>
-          {account ? (
-            <Tooltip disableFocusListener disableTouchListener title="Copy">
+          <Box sx={{ position: "absolute", right:"0" }}>
+            {account ? (
+              <Tooltip disableFocusListener disableTouchListener title="Copy">
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={copyAccount}
+                  sx={{ marginRight: 10 }}
+                >
+                  {shortenAddress(account)}
+                </Button>
+              </Tooltip>
+            ) : (
               <Button
-                variant="outlined"
+                variant="contained"
                 color="primary"
-                onClick={copyAccount}
+                onClick={() => activate(injectedConnector)}
                 sx={{ marginRight: 10 }}
               >
-                {shortenAddress(account)}
+                Connect Wallet
               </Button>
-            </Tooltip>
-          ) : (
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => activate(injectedConnector)}
-              sx={{ marginRight: 10 }}
-            >
-              Connect Wallet
-            </Button>
-          )}
+            )}
+          </Box>
         </Toolbar>
       </Container>
       <Link
