@@ -9,7 +9,7 @@ import useGroupAdmin from "./useGroupAdmin"
 import { Nft } from "@alch/alchemy-web3"
 import request from "./request"
 import { AxiosRequestConfig } from "axios"
-//import { Bytes32, Uint256 } from 'soltypes'
+import { Bytes32, Uint256 } from 'soltypes'
 
 const provider = new providers.JsonRpcProvider(
   `https://kovan.infura.io/v3/${
@@ -54,7 +54,12 @@ export default function useOnChainGroups(): ReturnParameters {
 
       setLoading(true)
 
-      const groupId = nft.contract.address
+      let groupId = (new Bytes32(nft.contract.address)).toUint().val
+
+      if(groupType === "poh"){
+        const flag = (new Bytes32("0x10000000000000000000000000000000000000000")).toUint().val
+        groupId = (BigInt(groupId) + BigInt(flag)).toString()
+      }
 
       const transaction = await SemaphoreContract.connect(
         adminWallet
