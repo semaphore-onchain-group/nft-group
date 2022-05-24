@@ -5,24 +5,11 @@ import Semaphore_contract from "contract-artifacts/Semaphore.json"
 import onchainAPI from "./OnchainAPI"
 import getNextConfig from "next/config"
 import { generateMerkleProof } from "@zk-kit/protocols"
-import { HashZero } from "@ethersproject/constants"
-import { toUtf8Bytes, concat, hexlify } from "ethers/lib/utils"
-import { Bytes31 } from "soltypes"
 import useGroupAdmin from "./useGroupAdmin"
 import { Nft } from "@alch/alchemy-web3"
 import request from "./request"
 import { AxiosRequestConfig } from "axios"
-
-function formatUint248String(text: string): string {
-  const bytes = toUtf8Bytes(text)
-
-  if (bytes.length > 30) {
-    throw new Error("byte31 string must be less than 31 bytes")
-  }
-
-  const hash = new Bytes31(hexlify(concat([bytes, HashZero]).slice(0, 31)))
-  return hash.toUint().toString()
-}
+//import { Bytes32, Uint256 } from 'soltypes'
 
 const provider = new providers.JsonRpcProvider(
   `https://kovan.infura.io/v3/${
@@ -70,7 +57,7 @@ export default function useOnChainGroups(): ReturnParameters {
 
       setLoading(true)
 
-      const groupId = formatUint248String(nft.title + groupType + "_group")
+      const groupId = nft.contract.address
 
       const transaction = await SemaphoreContract.connect(
         adminWallet
@@ -79,17 +66,24 @@ export default function useOnChainGroups(): ReturnParameters {
       const receipt = await provider.waitForTransaction(transaction.hash)
 
       if (!!receipt.status) {
-        // Todo: add thumbnailImg
+        let img_url
+        await fetch(`https://api.opensea.io/api/v1/asset_contract/${nft.contract.address}`, {method: 'GET'})
+        .then(response => response.json())
+        .then(response => img_url = response.image_url)
+        .catch(err => console.error(err))
+
         const config: AxiosRequestConfig = {
           method: "post",
           data: {
-            name: nft.title,
-            thumbnailImg: "",
+            name: nft.title.includes("#")
+            ? nft.title.substring(0, nft.title.indexOf("#"))
+            : nft.title,
+            thumbnailImg: img_url,
             contract: nft.contract.address,
             isPOH: groupType === "poh"
           }
         }
-
+        
         await request("/api/groups", config)
       }
 
