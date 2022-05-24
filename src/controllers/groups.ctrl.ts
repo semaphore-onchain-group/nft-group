@@ -18,6 +18,14 @@ export const write = async (req: NextApiRequest, res: NextApiResponse) => {
 export const list = async (req: NextApiRequest, res: NextApiResponse) => {
   await connectToDatabase()
   const groups = await Group.find().exec()
-  
+
   res.status(200).send({ data: groups })
+}
+
+export const read = async (req: NextApiRequest, res: NextApiResponse) => {
+  await connectToDatabase()
+  const groupId = req.query.groupdId
+  const group = await Group.findOne({ groupId }).exec()
+
+  res.status(200).send({ data: group })
 }
