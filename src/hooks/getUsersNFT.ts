@@ -1,6 +1,8 @@
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import getNextConfig from "next/config"
 import { createAlchemyWeb3, Nft } from "@alch/alchemy-web3"
+import request from "./request"
+import { IGroup } from "src/models/group"
 
 const alchemyKey = getNextConfig().publicRuntimeConfig.alchemyKey
 const web3 = createAlchemyWeb3(
@@ -10,10 +12,13 @@ const web3 = createAlchemyWeb3(
 type ReturnParameters = {
   usersNftList: (account: string) => Promise<Nft[] | null>
   checkUsersStatus: (account: string, grouptype: string ,nft: Nft) => Promise<boolean | null>
+  checkGroupsStatus: (grouptype: string, nft: Nft) => Promise<boolean| null>
+  groupstatusMsg?: string
 }
 
 export default function getUsersNFT(): ReturnParameters {
-  // Todo: add DB to find existing group
+  const [_message, setGroupStatusMsg] = useState<string>()
+
   const usersNftList = useCallback(
     async (account: string): Promise<Nft[] | null> => {
       const nfts = await web3.alchemy.getNfts({ owner: account })
@@ -61,8 +66,44 @@ export default function getUsersNFT(): ReturnParameters {
     },[]
   )
 
+  const checkGroupsStatus = useCallback(
+    async (grouptype: string, nft: Nft): Promise<boolean | null> => {
+      const response = await request('/api/groups') as IGroup[]
+      const filteredResponse = response.filter(nftgroup => nftgroup.contract.includes(nft.contract.address))
+      
+      if(filteredResponse.length > 1){
+        setGroupStatusMsg("Both groups general and poh have already been created.")
+        return false
+      }
+
+      if(grouptype === "poh")
+      {
+        if(filteredResponse.length && filteredResponse.at(0)?.isPOH){
+          setGroupStatusMsg("poh group has already been created.")
+          return false
+        }else{
+          setGroupStatusMsg("you can create a poh group for this nft.")
+          return true
+        }
+      }
+      //General group
+      else
+      {
+        if(filteredResponse.length && !filteredResponse.at(0)?.isPOH){
+          setGroupStatusMsg("general group has already been created.")
+          return false
+        }else{
+          setGroupStatusMsg("you can create a general group for this nft.")
+          return true
+        }
+      }
+    },[]
+  )
+
   return {
     usersNftList,
-    checkUsersStatus
+    checkUsersStatus,
+    checkGroupsStatus,
+    groupstatusMsg: _message
   }
 }
