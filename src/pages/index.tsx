@@ -7,36 +7,168 @@ import {
   Grid,
   Container,
   Button,
-  Tooltip
+  Tooltip,
+  Toolbar,
+  Menu,
+  MenuItem,
+  FormControlLabel,
+  Checkbox
 } from "@mui/material"
-import { useStyles, theme } from "src/styles"
+import {
+  useStyles,
+  theme,
+  Search,
+  SearchIconWrapper,
+  StyledInputBase
+} from "src/styles"
 import Thumbnail from "src/components/Thumbnail"
 import getGroupList from "src/hooks/getGroupList"
 import AddBoxIcon from "@mui/icons-material/AddBox"
 import { useRouter } from "next/router"
+import React, { useEffect, useState } from "react"
+import { GroupType } from "src/types/group"
+import SearchIcon from "@mui/icons-material/Search"
+import { FilterList } from "@mui/icons-material"
 
 const Home: NextPage = () => {
   const router = useRouter()
   const classes = useStyles()
-  const groupList = getGroupList()
+  const [_fullGroupList, setFullGroupList] = useState<GroupType[]>([])
+  const [_groupList, setGroupList] = useState<GroupType[]>([])
+  const [_generalChecked, setGeneralChecked] = useState<boolean>(true)
+  const [_pohChecked, setPohChecked] = useState<boolean>(true)
+  const [_anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [_searchField, setSearchField] = useState<string>("")
+  const openFilter = Boolean(_anchorEl)
+
+  const handleClickFilter = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget)
+  }
+
+  useEffect(() => {
+    ;(async () => {
+      const groupList = await getGroupList()
+      setFullGroupList(groupList)
+      setGroupList(groupList)
+    })()
+  }, [])
+
+  useEffect(() => {
+    if (_generalChecked !== _pohChecked) {
+      setGroupList(
+        _fullGroupList.filter((group) => group.isPOH === _pohChecked)
+      )
+    } else if (_generalChecked && _pohChecked) {
+      setGroupList(_fullGroupList)
+    } else {
+      setGroupList([])
+    }
+  }, [_pohChecked, _generalChecked])
+
+  useEffect(() => {
+    setGroupList(
+      _fullGroupList.filter((group) =>
+        group.name.toLowerCase().includes(_searchField.toLowerCase())
+      )
+    )
+  }, [_searchField])
 
   return (
     <ThemeProvider theme={theme}>
       <Paper className={classes.container} elevation={0} square={true}>
         <Box className={classes.content}>
-          <Typography variant="h4" sx={{ mb: 10 }}>
+          <Typography variant="h4" sx={{ mt: 10, mb: 10 }}>
             Semaphore On-chain NFT group
           </Typography>
 
-          <Grid container spacing={10} justifyContent="center">
-            {groupList.map((group) => (
-              <Grid key={group.index} item xs={3}>
-                <Thumbnail index={group.index} groupName={group.groupName} imgSrc={group.imgSrc} />
+          <Grid container spacing={10} sx={{ mb: 20 }}>
+            <Grid item xs={12}>
+              <Toolbar>
+                <Grid container spacing={1}>
+                  <Grid item xs={3}>
+                    <Button
+                      variant="outlined"
+                      sx={{ color: "white" }}
+                      onClick={() => router.push("/admin")}
+                    >
+                      <Typography>create group</Typography>
+                    </Button>
+                  </Grid>
+
+                  <Grid item xs={5}></Grid>
+
+                  <Grid item xs={3}>
+                    <Search>
+                      <SearchIconWrapper>
+                        <SearchIcon />
+                      </SearchIconWrapper>
+                      <StyledInputBase
+                        type="search"
+                        placeholder="Search group…"
+                        onChange={(e) => {
+                          setSearchField(e.target.value)
+                        }}
+                      />
+                    </Search>
+                  </Grid>
+
+                  <Grid item xs={1}>
+                    <Button onClick={handleClickFilter} sx={{ color: "white" }}>
+                      <FilterList />
+                    </Button>
+                    <Menu
+                      anchorEl={_anchorEl}
+                      open={openFilter}
+                      onClose={() => setAnchorEl(null)}
+                    >
+                      <MenuItem>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              defaultChecked
+                              checked={_generalChecked}
+                              onChange={(e) => {
+                                setGeneralChecked(e.target.checked)
+                              }}
+                            />
+                          }
+                          label="General NFT group"
+                        />
+                      </MenuItem>
+                      <MenuItem>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              defaultChecked
+                              checked={_pohChecked}
+                              onChange={(e) => {
+                                setPohChecked(e.target.checked)
+                              }}
+                            />
+                          }
+                          label="PoH NFT group"
+                        />
+                      </MenuItem>
+                    </Menu>
+                  </Grid>
+                </Grid>
+              </Toolbar>
+            </Grid>
+            {_groupList.map((group) => (
+              <Grid key={group.groupId} item xs={3}>
+                <Thumbnail
+                  groupId={group.groupId}
+                  name={group.name}
+                  thumbnailImg={group.thumbnailImg}
+                  contract={group.contract}
+                  memberCount={group.memberCount}
+                  isPOH={group.isPOH}
+                />
               </Grid>
             ))}
             <Grid item xs={3}>
               <Container>
-                <Tooltip title="Create group" placement="bottom">
+                <Tooltip title="Create new group" placement="bottom">
                   <Button
                     onClick={() => router.push("/admin")}
                     sx={{ width: 150, height: 150, color: "gray", border: 1 }}
