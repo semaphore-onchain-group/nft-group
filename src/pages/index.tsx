@@ -37,14 +37,12 @@ const Home: NextPage = () => {
   const [_groupList, setGroupList] = useState<GroupType[]>([])
   const [_generalChecked, setGeneralChecked] = useState<boolean>(true)
   const [_pohChecked, setPohChecked] = useState<boolean>(true)
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
-  const open = Boolean(anchorEl)
+  const [_anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [_searchField, setSearchField] = useState<string>("")
+  const openFilter = Boolean(_anchorEl)
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClickFilter = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
-  }
-  const handleClose = () => {
-    setAnchorEl(null)
   }
 
   useEffect(() => {
@@ -57,13 +55,23 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     if (_generalChecked !== _pohChecked) {
-      setGroupList(_fullGroupList.filter(group=>group.isPOH === _pohChecked))
-    } else if(_generalChecked && _pohChecked) {
+      setGroupList(
+        _fullGroupList.filter((group) => group.isPOH === _pohChecked)
+      )
+    } else if (_generalChecked && _pohChecked) {
       setGroupList(_fullGroupList)
     } else {
       setGroupList([])
     }
   }, [_pohChecked, _generalChecked])
+
+  useEffect(() => {
+    setGroupList(
+      _fullGroupList.filter((group) =>
+        group.name.toLowerCase().includes(_searchField.toLowerCase())
+      )
+    )
+  }, [_searchField])
 
   return (
     <ThemeProvider theme={theme}>
@@ -94,15 +102,25 @@ const Home: NextPage = () => {
                       <SearchIconWrapper>
                         <SearchIcon />
                       </SearchIconWrapper>
-                      <StyledInputBase placeholder="Search group…" />
+                      <StyledInputBase
+                        type="search"
+                        placeholder="Search group…"
+                        onChange={(e) => {
+                          setSearchField(e.target.value)
+                        }}
+                      />
                     </Search>
                   </Grid>
 
                   <Grid item xs={1}>
-                    <Button onClick={handleClick} sx={{ color: "white" }}>
+                    <Button onClick={handleClickFilter} sx={{ color: "white" }}>
                       <FilterList />
                     </Button>
-                    <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+                    <Menu
+                      anchorEl={_anchorEl}
+                      open={openFilter}
+                      onClose={() => setAnchorEl(null)}
+                    >
                       <MenuItem>
                         <FormControlLabel
                           control={
