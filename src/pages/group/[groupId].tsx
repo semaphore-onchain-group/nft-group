@@ -1,7 +1,9 @@
-import type { NextPage } from "next"
-import React, { useState } from 'react'
+import type { NextPage, GetServerSideProps } from "next"
+import React, { useState, useEffect } from 'react'
 import { ThemeProvider } from "@mui/material/styles"
 import { useRouter } from "next/router"
+import { useWeb3React } from "@web3-react/core"
+import { providers } from "ethers"
 
 import {
   Paper,
@@ -15,10 +17,16 @@ import {
 } from "@mui/material"
 import { LoadingButton } from "@mui/lab"
 import { useStyles, theme } from "src/styles"
+import request from "src/hooks/request"
+import getUsersNFT from "src/hooks/getUsersNFT"
+import { Group } from "src/types/group"
 
-const GroupPage: NextPage = () => {
+type Props = Group
+
+const GroupPage: NextPage<Props> = ({ contract }) => {
   const router = useRouter()
   const classes = useStyles()
+  const { account } = useWeb3React<providers.Web3Provider>()
 
   const { groupId } = router.query
 
@@ -26,7 +34,31 @@ const GroupPage: NextPage = () => {
   const [_error, setError] = useState<
     { errorStep: number; message?: string } | undefined
   >()
- 
+  const { usersNftList } = getUsersNFT()
+
+  useEffect(() => {
+    ; (async () => {
+      setError(undefined)
+
+      if (!account) {
+        setError({ errorStep: 0, message: "Connect your Wallet first" })
+        setActiveStep(0)
+        return
+      }
+
+      const nftList = await usersNftList(account)
+      const isOwnNft = nftList?.some(nft => nft.contract.address === contract)
+
+      if (!isOwnNft) {
+        setError({ errorStep: 0, message: "You don't have this group's Nft." })
+        setActiveStep(0)
+        return
+      }
+
+      setActiveStep(1)
+    })()
+  }, [account])
+
   return (
     <ThemeProvider theme={theme}>
       <Paper className={classes.container} elevation={0} square={true}>
@@ -79,6 +111,17 @@ const GroupPage: NextPage = () => {
       </Paper>
     </ThemeProvider>
   )
+}
+
+export const getServerSideProps: GetServerSideProps = async ({ req, resolvedUrl, query }) => {
+  const protocol = req.headers.referer?.startsWith('https') ? 'https' : 'http'
+  const groupInfo = await request(`${protocol}://${req.headers.host}/api/groups?groupId=${query.groupId}`)
+
+  return {
+    props: {
+      ...groupInfo
+    },
+  }
 }
 
 export default GroupPage

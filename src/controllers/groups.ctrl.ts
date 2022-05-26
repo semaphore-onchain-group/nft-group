@@ -24,7 +24,7 @@ export const list = async (req: NextApiRequest, res: NextApiResponse) => {
 
 export const read = async (req: NextApiRequest, res: NextApiResponse) => {
   await connectToDatabase()
-  const groupId = req.query.groupdId
+  const groupId = req.query.groupId
   const group = await Group.findOne({ groupId }).exec()
 
   res.status(200).send({ data: group })
