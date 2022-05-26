@@ -12,11 +12,21 @@ import {
   FormControl,
   InputLabel,
   MenuItem,
-  Link
+  Link,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Snackbar,
 } from "@mui/material"
 import React, { useEffect, useState } from "react"
 import { useStyles } from "src/styles"
 import Select, { SelectChangeEvent } from "@mui/material/Select"
+import MuiAlert, { AlertProps } from "@mui/material/Alert"
 import useOnChainGroups from "src/hooks/useOnChainGroups"
 import { useWeb3React } from "@web3-react/core"
 import { providers } from "ethers"
@@ -24,20 +34,31 @@ import { useRouter } from "next/router"
 import getUsersNFT from "src/hooks/getUsersNFT"
 import { Nft } from "@alch/alchemy-web3"
 
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  props,
+  ref,
+  ){
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props}/>
+  })
+
 const Admin: NextPage = () => {
   const classes = useStyles()
   const router = useRouter()
   const { account } = useWeb3React<providers.Web3Provider>()
   const { createNftGroup, loading, etherscanLink, transactionstatus } =
     useOnChainGroups()
-  const { usersNftList } = getUsersNFT()
+  const { usersNftList, checkGroupsStatus, groupstatusMsg } = getUsersNFT()
   const [_activeStep, setActiveStep] = useState<number>(0)
   const [_error, setError] = useState<
     { errorStep: number; message?: string } | undefined
   >()
+  const [_openDialog, setOpenDialog] = useState(false)
+  const [_openSuccess, setOpenSuccess] = useState(false)
+  const [_openFail, setOpenFail] = useState(false)
   const [_nft, setNft] = useState<Nft>()
   const [_nftlist, setNftList] = useState<Nft[]>([])
   const [_groupType, setGroupType] = useState<string>("")
+
   useEffect(() => {
     ; (async () => {
       setError(undefined)
@@ -47,11 +68,21 @@ const Admin: NextPage = () => {
           setNftList(nftlist)
         }
       }
+      if (!account){
+        setNftList([])
+        setError({errorStep:0,message:"Connect your Wallet first"})
+        setActiveStep(0)
+      }
     })()
   }, [_activeStep, account])
 
-  function handleNext() {
+  const handleNext = () => {
     setActiveStep((prevActiveStep: number) => prevActiveStep + 1)
+    setError(undefined)
+  }
+
+  const handleBack = () => {
+    setActiveStep((prevActiveStep: number) => prevActiveStep - 1)
     setError(undefined)
   }
 
@@ -63,11 +94,35 @@ const Admin: NextPage = () => {
 
   const selectGroupType = (event: SelectChangeEvent) => {
     setGroupType(event.target.value)
-    handleNext()
   }
 
+  const handleDialogOpen = () => {
+    setOpenDialog(true)
+  }
+
+  const handleDialogClose = () => {
+    setOpenDialog(false)
+  }
+
+  const handleAlertClose = () => {
+    setOpenSuccess(false)
+    setOpenFail(false)
+  }
+
+  const checkGroup = async () => {
+    if(_nft && await checkGroupsStatus(_groupType,_nft)){
+      setOpenSuccess(true)
+      handleNext()
+    }
+    else{
+      setOpenFail(true)
+      setError({errorStep:1})
+    }
+  }
+  
   const createGroup = async () => {
     try {
+      setOpenDialog(false)
       _nft && await createNftGroup(_nft, _groupType)
     } catch (e) {
       setError({
@@ -90,11 +145,11 @@ const Admin: NextPage = () => {
 
         <Stepper activeStep={_activeStep} orientation="vertical">
           <Step>
-            <StepLabel error={_error?.errorStep === 1}>Select NFT</StepLabel>
+            <StepLabel error={_error?.errorStep === 0}>Select NFT</StepLabel>
             <StepContent style={{ width: 400 }}>
-              <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }}>
+              <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }} disabled={_error?.errorStep === 0}>
                 <InputLabel>Select NFT</InputLabel>
-                <Select value={_nft?.title || ''} onChange={selectNft}>
+                <Select value={_nft?.title || ''} onChange={selectNft}> 
                   {_nftlist.map((nft, idx) => (
                     <MenuItem value={idx} key={nft.title}>
                       {nft.title}
@@ -105,21 +160,26 @@ const Admin: NextPage = () => {
             </StepContent>
           </Step>
           <Step>
-            <StepLabel error={_error?.errorStep === 2}>
+            <StepLabel error={_error?.errorStep === 1}>
               Select Type of the Group
+              <Button onClick={handleBack} disabled={_activeStep !== 1} >back</Button>
             </StepLabel>
             <StepContent style={{ width: 400 }}>
               <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }}>
-                <InputLabel>NFT Type</InputLabel>
-                <Select value={_groupType} onChange={selectGroupType}>
-                  <MenuItem value="general">General NFT</MenuItem>
-                  <MenuItem value="poh">PoH(Proof of Humanity)</MenuItem>
-                </Select>
+                <RadioGroup value={_groupType} onChange={selectGroupType}>
+                  <FormControlLabel value="general" control={<Radio/>} label="General NFT"/>
+                  <FormControlLabel value="poh" control={<Radio/>} label="PoH(Proof of Humanity)"/>
+                </RadioGroup>
+                <Button onClick={checkGroup}>check&create</Button>
               </FormControl>
             </StepContent>
           </Step>
           <Step>
-            <StepLabel error={_error?.errorStep === 3}>Create Group</StepLabel>
+            <StepLabel error={_error?.errorStep === 2}>
+              Create Group
+              <Button onClick={handleBack} disabled={_activeStep !== 2} >back</Button>
+              </StepLabel>
+              
             <StepContent style={{ width: 400 }}>
               {transactionstatus !== undefined ? (
                 <Box>
@@ -145,25 +205,49 @@ const Admin: NextPage = () => {
                   </Button>
                 </Box>
               ) : (
+                <Box>
                   <LoadingButton
                     fullWidth
-                    onClick={createGroup}
+                    onClick={handleDialogOpen}
                     variant="outlined"
                     loading={loading}
                   >
                     Create Group
                   </LoadingButton>
+                  <Dialog open={_openDialog} onClose={handleDialogClose}>
+                    <DialogTitle>Make sure you want to create this group </DialogTitle>
+                    <DialogContent>
+                      <DialogContentText>
+                        {`NFT : ${_nft?.title}`}<br/>
+                        {`GroupType : ${_groupType}`}<br/><br/>
+                        {`This group will be created by ${_groupType} NFT on-chain group admin,
+                        and if this group is created successfully,
+                        you can join this group`}
+                      </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                      <Button onClick={handleDialogClose}>Cancel</Button>
+                      <Button onClick={createGroup}>Create</Button>
+                    </DialogActions>
+                  </Dialog>
+                </Box>
                 )}
             </StepContent>
           </Step>
         </Stepper>
         {_error && (
-          <Paper className={classes.results} sx={{ p: 3 }}>
+          <Paper className={classes.results}>
             {_error.message && (
-              <Typography variant="body1">{_error.message}</Typography>
+              <Typography variant="body1" sx={{ p: 3 }}>{_error.message}</Typography>
             )}
           </Paper>
         )}
+          <Snackbar anchorOrigin={{vertical:"bottom",horizontal:"center"}} open={_openSuccess} autoHideDuration={5000} onClose={handleAlertClose}>
+            <Alert severity="success" sx={{width:'100%'}}>{groupstatusMsg}</Alert>
+          </Snackbar>
+          <Snackbar anchorOrigin={{vertical:"bottom",horizontal:"center"}} open={_openFail} autoHideDuration={5000} onClose={handleAlertClose}>
+            <Alert severity="error" sx={{width:'100%'}}>{groupstatusMsg}</Alert>
+          </Snackbar>
       </Box>
     </Paper>
   )

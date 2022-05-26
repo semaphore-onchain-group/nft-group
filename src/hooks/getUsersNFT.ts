@@ -17,7 +17,7 @@ type ReturnParameters = {
 }
 
 export default function getUsersNFT(): ReturnParameters {
-  const [_message, setGroupStatusMsg] = useState<string>()
+  const [_message, setGroupStatusMsg] = useState<string>("")
 
   const usersNftList = useCallback(
     async (account: string): Promise<Nft[] | null> => {
@@ -53,7 +53,7 @@ export default function getUsersNFT(): ReturnParameters {
         return !!minted.transfers.length
       }
     //General nft time Holding check at least one day before the current time  
-    else
+    else if(grouptype === "general")
       {
         const timestamp = (new Date(nft.timeLastUpdated)).getTime()
         const timespend_sec = Math.floor((Date.now() - timestamp)/1000)
@@ -63,6 +63,10 @@ export default function getUsersNFT(): ReturnParameters {
           return false
         }
       }
+    else
+    {
+      return false
+    }
     },[]
   )
 
@@ -87,7 +91,7 @@ export default function getUsersNFT(): ReturnParameters {
         }
       }
       //General group
-      else
+      else if(grouptype === "general")
       {
         if(filteredResponse.length && !filteredResponse.at(0)?.isPOH){
           setGroupStatusMsg("general group has already been created.")
@@ -96,6 +100,10 @@ export default function getUsersNFT(): ReturnParameters {
           setGroupStatusMsg("you can create a general group for this nft.")
           return true
         }
+      }
+      else{
+        setGroupStatusMsg("unable to check group status.")
+        return false
       }
     },[]
   )
