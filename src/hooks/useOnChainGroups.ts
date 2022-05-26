@@ -5,12 +5,12 @@ import Semaphore_contract from "contract-artifacts/Semaphore.json"
 import onchainAPI from "./OnchainAPI"
 import getNextConfig from "next/config"
 import { generateMerkleProof } from "@zk-kit/protocols"
-import useGroupAdmin from "./useGroupAdmin"
 import { Nft } from "@alch/alchemy-web3"
 import request from "./request"
 import { AxiosRequestConfig } from "axios"
 import { Bytes32, Uint256 } from 'soltypes'
 import { GroupType } from "src/types/group"
+import { getGroupAdmin } from "src/utils/getGroupAdmin"
 
 const provider = new providers.JsonRpcProvider(
   `https://kovan.infura.io/v3/${
@@ -29,8 +29,8 @@ type ReturnParameters = {
   createNftGroup: (nft: Nft, groupType: GroupType) => Promise<true | null>
   signMessage: (signer: Signer, message: string) => Promise<string | null>
   retrieveIdentityCommitment: (signer: Signer, groupId: string) => Promise<string | null>
-  joinGroup: (groupId: string, groupType: string, identityCommitment: string) => Promise<true | null>
-  leaveGroup: (groupId: string, groupType: string, identityCommitment: string) => Promise<true | null>
+  joinGroup: (groupId: string, groupType: GroupType, identityCommitment: string) => Promise<true | null>
+  leaveGroup: (groupId: string, groupType: GroupType, identityCommitment: string) => Promise<true | null>
   memberCount: (groupId: string) => Promise<number | null>
   etherscanLink?: string
   transactionstatus?: boolean
@@ -39,7 +39,6 @@ type ReturnParameters = {
 }
 
 export default function useOnChainGroups(): ReturnParameters {
-  const { getGroupAdmin } = useGroupAdmin()
   const [_loading, setLoading] = useState<boolean>(false)
   const [_link, setEtherscanLink] = useState<string>()
   const [_transactionStatus, setTransactionStatus] = useState<boolean>()
@@ -47,10 +46,8 @@ export default function useOnChainGroups(): ReturnParameters {
 
   const createNftGroup = useCallback(
     async (nft: Nft, groupType: GroupType): Promise<true | null> => {
-      const adminWallet = await getGroupAdmin(groupType).then((wallet) => {
-        return wallet
-      })
-      
+      const adminWallet = getGroupAdmin(groupType)
+
       if (!adminWallet) return null
 
       setLoading(true)
@@ -143,10 +140,8 @@ export default function useOnChainGroups(): ReturnParameters {
   )
 
   const joinGroup = useCallback(
-    async (groupId: string, groupType: string, identityCommitment: string): Promise<true | null> => {
-      const adminWallet = await getGroupAdmin(groupType).then((wallet) => {
-        return wallet
-      })
+    async (groupId: string, groupType: GroupType, identityCommitment: string): Promise<true | null> => {
+      const adminWallet = getGroupAdmin(groupType)
       
       if (!adminWallet) return null
 
@@ -171,10 +166,8 @@ export default function useOnChainGroups(): ReturnParameters {
   )
 
   const leaveGroup = useCallback(
-    async (groupId: string, groupType: string, IdentityCommitment: string): Promise<true | null> => {
-      const adminWallet = await getGroupAdmin(groupType).then((wallet) => {
-        return wallet
-      })
+    async (groupId: string, groupType: GroupType, IdentityCommitment: string): Promise<true | null> => {
+      const adminWallet = getGroupAdmin(groupType)
       
       if (!adminWallet) return null
 
