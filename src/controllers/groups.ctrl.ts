@@ -17,7 +17,10 @@ export const write = async (req: NextApiRequest, res: NextApiResponse) => {
 
 export const list = async (req: NextApiRequest, res: NextApiResponse) => {
   await connectToDatabase()
-  const groups = await Group.find().exec()
+  const groups = (await Group.find().exec()).map((group) => ({
+    ...group._doc,
+    memberCount: group.members.length
+  }))
 
   res.status(200).send({ data: groups })
 }
@@ -27,5 +30,26 @@ export const read = async (req: NextApiRequest, res: NextApiResponse) => {
   const groupId = req.query.groupId
   const group = await Group.findOne({ groupId }).exec()
 
-  res.status(200).send({ data: group })
+  res
+    .status(200)
+    .send({ data: { ...group._doc, memberCount: group.members.length } })
+}
+
+export const update = async (req: NextApiRequest, res: NextApiResponse) => {
+  await connectToDatabase()
+  const { groupId, identityCommitment } = req.body
+
+  try {
+    identityCommitment &&
+      (await Group.updateOne(
+        { groupId },
+        {
+          $addToSet: { members: [identityCommitment] }
+        }
+      ).exec())
+
+    res.status(200).end()
+  } catch (e) {
+    res.status(500).end()
+  }
 }

@@ -1,15 +1,19 @@
 import mongoose from "mongoose"
-import { Group as IGroup } from "src/types/group"
+import { Group as GroupType } from "src/types/group"
 
 const { Schema } = mongoose
+
+interface IGroup extends GroupType {
+  members: Array<string>
+}
 
 const GroupSchema = new Schema<IGroup>({
   groupId: String,
   name: String,
   thumbnailImg: String,
   contract: String,
-  memberCount: Number,
-  groupType: String
+  groupType: String,
+  members: [{type: String, unique: true}]
 })
 
 const Group =
