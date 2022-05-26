@@ -153,6 +153,7 @@ const Home: NextPage = () => {
                   groupId={group.groupId}
                   name={group.name}
                   thumbnailImg={group.thumbnailImg}
+                  groupType={group.groupType}
                 />
               </Grid>
             ))}
