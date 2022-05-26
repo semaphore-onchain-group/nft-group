@@ -10,6 +10,7 @@ import { Nft } from "@alch/alchemy-web3"
 import request from "./request"
 import { AxiosRequestConfig } from "axios"
 import { Bytes32, Uint256 } from 'soltypes'
+import { GroupType } from "src/types/group"
 
 const provider = new providers.JsonRpcProvider(
   `https://kovan.infura.io/v3/${
@@ -25,7 +26,7 @@ const SemaphoreContract = new Contract(
 const DEPTH = 20
 
 type ReturnParameters = {
-  createNftGroup: (nft: Nft, groupType: string) => Promise<true | null>
+  createNftGroup: (nft: Nft, groupType: GroupType) => Promise<true | null>
   signMessage: (signer: Signer, message: string) => Promise<string | null>
   retrieveIdentityCommitment: (signer: Signer, groupId: string) => Promise<string | null>
   joinGroup: (groupId: string, groupType: string, identityCommitment: string) => Promise<true | null>
@@ -45,7 +46,7 @@ export default function useOnChainGroups(): ReturnParameters {
   const [_hasjoined, setHasjoined] = useState<boolean>(false)
 
   const createNftGroup = useCallback(
-    async (nft: Nft, groupType: string): Promise<true | null> => {
+    async (nft: Nft, groupType: GroupType): Promise<true | null> => {
       const adminWallet = await getGroupAdmin(groupType).then((wallet) => {
         return wallet
       })
@@ -56,7 +57,7 @@ export default function useOnChainGroups(): ReturnParameters {
 
       let groupId = (new Bytes32(nft.contract.address)).toUint().val
 
-      if(groupType === "poh"){
+      if(groupType === GroupType.POH){
         const flag = (new Bytes32("0x10000000000000000000000000000000000000000")).toUint().val
         groupId = (BigInt(groupId) + BigInt(flag)).toString()
       }
@@ -80,7 +81,7 @@ export default function useOnChainGroups(): ReturnParameters {
             name: nft.title,
             thumbnailImg: img_url,
             contract: nft.contract.address,
-            isPOH: groupType === "poh",
+            groupType,
             groupId,
           }
         }

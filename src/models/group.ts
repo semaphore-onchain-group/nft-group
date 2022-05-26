@@ -1,15 +1,7 @@
 import mongoose from "mongoose"
+import { Group as IGroup } from "src/types/group"
 
 const { Schema } = mongoose
-
-export interface IGroup {
-  groupId: string
-  name: string
-  thumbnailImg: string
-  contract: string
-  memberCount: number
-  isPOH: boolean
-}
 
 const GroupSchema = new Schema<IGroup>({
   groupId: String,
@@ -17,8 +9,9 @@ const GroupSchema = new Schema<IGroup>({
   thumbnailImg: String,
   contract: String,
   memberCount: Number,
-  isPOH: Boolean
+  groupType: String
 })
 
-const Group = mongoose.models.Group || mongoose.model<IGroup>("Group", GroupSchema)
+const Group =
+  mongoose.models.Group || mongoose.model<IGroup>("Group", GroupSchema)
 export default Group
