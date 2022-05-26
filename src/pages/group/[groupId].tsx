@@ -14,27 +14,47 @@ import {
   StepLabel,
   Step,
   StepContent,
+  Link,
 } from "@mui/material"
 import { LoadingButton } from "@mui/lab"
 import { useStyles, theme } from "src/styles"
 import request from "src/hooks/request"
 import getUsersNFT from "src/hooks/getUsersNFT"
 import { Group } from "src/types/group"
+import { AxiosRequestConfig } from "axios"
+import useOnChainGroups from "src/hooks/useOnChainGroups"
+import useSigner from "src/hooks/useSigner"
+import ConnectWalletInfo from "src/components/ConnectWalletInfo"
 
 type Props = Group
 
-const GroupPage: NextPage<Props> = ({ contract }) => {
+type Query = {
+  groupId?: string
+}
+
+const GroupPage: NextPage<Props> = ({ contract, groupType }) => {
   const router = useRouter()
   const classes = useStyles()
   const { account } = useWeb3React<providers.Web3Provider>()
-
-  const { groupId } = router.query
+  const { groupId } = router.query as unknown as Query
 
   const [_activeStep, setActiveStep] = useState<number>(0)
   const [_error, setError] = useState<
     { errorStep: number; message?: string } | undefined
   >()
+  const [_identityCommitment, setIdentityCommitment] = useState<string>()
   const { usersNftList } = getUsersNFT()
+  const _signer = useSigner()
+  const {
+    signMessage,
+    retrieveIdentityCommitment,
+    joinGroup,
+    leaveGroup,
+    hasjoined,
+    loading,
+    etherscanLink,
+    transactionstatus
+  } = useOnChainGroups()
 
   useEffect(() => {
     ; (async () => {
@@ -58,6 +78,51 @@ const GroupPage: NextPage<Props> = ({ contract }) => {
       setActiveStep(1)
     })()
   }, [account])
+
+  const generateIdentity = async () => {
+    try {
+      const identityCommitment =
+        _signer && groupId && (await retrieveIdentityCommitment(_signer, groupId))
+
+      if (!identityCommitment) return
+
+      setIdentityCommitment(identityCommitment)
+      identityCommitment && setActiveStep(2)
+    } catch (e) {
+      setError({
+        errorStep: _activeStep,
+        message: "generate identity Failed - " + e
+      })
+    }
+  }
+
+  const joinOnChainGroup = async () => {
+    try {
+      if (!_signer || !_identityCommitment || !groupId) return
+
+      const userSignature = await signMessage(_signer, _identityCommitment)
+
+      if (userSignature) {
+        await joinGroup(groupId, groupType, _identityCommitment)
+      }
+    } catch (e) {
+      setError({ errorStep: _activeStep, message: "join group Failed - " + e })
+    }
+  }
+
+  const leaveOnchainGroup = async () => {
+    try {
+      if (!_signer || !_identityCommitment || !groupId) return
+
+      const userSignature = await signMessage(_signer, _identityCommitment)
+
+      if (userSignature) {
+        await leaveGroup(groupId, groupType, _identityCommitment)
+      }
+    } catch (e) {
+      setError({ errorStep: _activeStep, message: "leave group Failed - " + e })
+    }
+  }
 
   return (
     <ThemeProvider theme={theme}>
@@ -88,6 +153,7 @@ const GroupPage: NextPage<Props> = ({ contract }) => {
                 <Button
                   fullWidth
                   variant="outlined"
+                  onClick={generateIdentity}
                 >
                   Generate Identity
                 </Button>
@@ -95,27 +161,59 @@ const GroupPage: NextPage<Props> = ({ contract }) => {
             </Step>
             <Step>
               <StepLabel error={_error?.errorStep === 2}>
-                Join Group
+                {hasjoined ? "Leave" : "Join"} Group
               </StepLabel>
               <StepContent style={{ width: 400 }}>
-                <LoadingButton
-                  fullWidth
-                  variant="outlined"
-                >
-                  Join Group
-                </LoadingButton>
+                {transactionstatus !== undefined ? (
+                  <Box>
+                    <Typography variant="body1">
+                      Transaction{" "}
+                      {!!transactionstatus ? "Successful" : "Failed"} (Check
+                      the&nbsp;
+                      <Link
+                        href={etherscanLink}
+                        underline="hover"
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        transaction
+                      </Link>
+                      )
+                    </Typography>
+                    <Button fullWidth onClick={window.location.reload} variant="outlined">
+                      Home
+                    </Button>
+                  </Box>
+                ) : (
+                    <LoadingButton
+                      fullWidth
+                      onClick={hasjoined ? leaveOnchainGroup : joinOnChainGroup}
+                      variant="outlined"
+                      loading={loading}
+                    >
+                      {hasjoined ? "Leave" : "Join"} Group
+                    </LoadingButton>
+                  )}
               </StepContent>
             </Step>
           </Stepper>
+          {!account && <ConnectWalletInfo />}
+          {_error && (
+            <Paper className={classes.results} sx={{ p: 3 }}>
+              {_error.message && (
+                <Typography variant="body1">{_error.message}</Typography>
+              )}
+            </Paper>
+          )}
         </Box>
       </Paper>
     </ThemeProvider>
   )
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ req, resolvedUrl, query }) => {
-  const protocol = req.headers.referer?.startsWith('https') ? 'https' : 'http'
-  const groupInfo = await request(`${protocol}://${req.headers.host}/api/groups?groupId=${query.groupId}`)
+export const getServerSideProps: GetServerSideProps = async ({ req, query }) => {
+  const origin = new URL(req.headers.referer || '').origin
+  const groupInfo = await request(`${origin}/api/groups/${query.groupId}`)
 
   return {
     props: {
