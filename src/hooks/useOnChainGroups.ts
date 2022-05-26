@@ -8,7 +8,7 @@ import { generateMerkleProof } from "@zk-kit/protocols"
 import { Nft } from "@alch/alchemy-web3"
 import request from "./request"
 import { AxiosRequestConfig } from "axios"
-import { Bytes32, Uint256 } from 'soltypes'
+import { Bytes32, Uint256 } from "soltypes"
 import { GroupType } from "src/types/group"
 import { getGroupAdmin } from "src/utils/frontend/getGroupAdmin"
 
@@ -28,9 +28,20 @@ const DEPTH = 20
 type ReturnParameters = {
   createNftGroup: (nft: Nft, groupType: GroupType) => Promise<true | null>
   signMessage: (signer: Signer, message: string) => Promise<string | null>
-  retrieveIdentityCommitment: (signer: Signer, groupId: string) => Promise<string | null>
-  joinGroup: (groupId: string, groupType: GroupType, identityCommitment: string) => Promise<true | null>
-  leaveGroup: (groupId: string, groupType: GroupType, identityCommitment: string) => Promise<true | null>
+  retrieveIdentityCommitment: (
+    signer: Signer,
+    groupId: string
+  ) => Promise<string | null>
+  joinGroup: (
+    groupId: string,
+    groupType: GroupType,
+    identityCommitment: string
+  ) => Promise<true | null>
+  leaveGroup: (
+    groupId: string,
+    groupType: GroupType,
+    identityCommitment: string
+  ) => Promise<true | null>
   memberCount: (groupId: string) => Promise<number | null>
   etherscanLink?: string
   transactionstatus?: boolean
@@ -52,10 +63,12 @@ export default function useOnChainGroups(): ReturnParameters {
 
       setLoading(true)
 
-      let groupId = (new Bytes32(nft.contract.address)).toUint().val
+      let groupId = new Bytes32(nft.contract.address).toUint().val
 
-      if(groupType === GroupType.POH){
-        const flag = (new Bytes32("0x10000000000000000000000000000000000000000")).toUint().val
+      if (groupType === GroupType.POH) {
+        const flag = new Bytes32(
+          "0x10000000000000000000000000000000000000000"
+        ).toUint().val
         groupId = (BigInt(groupId) + BigInt(flag)).toString()
       }
 
@@ -67,10 +80,13 @@ export default function useOnChainGroups(): ReturnParameters {
 
       if (!!receipt.status) {
         let img_url
-        await fetch(`https://api.opensea.io/api/v1/asset_contract/${nft.contract.address}`, {method: 'GET'})
-        .then(response => response.json())
-        .then(response => img_url = response.image_url)
-        .catch(err => console.error(err))
+        await fetch(
+          `https://api.opensea.io/api/v1/asset_contract/${nft.contract.address}`,
+          { method: "GET" }
+        )
+          .then((response) => response.json())
+          .then((response) => (img_url = response.image_url))
+          .catch((err) => console.error(err))
 
         const config: AxiosRequestConfig = {
           method: "post",
@@ -79,15 +95,14 @@ export default function useOnChainGroups(): ReturnParameters {
             thumbnailImg: img_url,
             contract: nft.contract.address,
             groupType,
-            groupId,
+            groupId
           }
         }
-        
+
         await request("/api/groups", config)
       }
 
       setTransactionStatus(!!receipt.status)
-
       setEtherscanLink("https://kovan.etherscan.io/tx/" + transaction.hash)
       setLoading(false)
 
@@ -140,9 +155,13 @@ export default function useOnChainGroups(): ReturnParameters {
   )
 
   const joinGroup = useCallback(
-    async (groupId: string, groupType: GroupType, identityCommitment: string): Promise<true | null> => {
+    async (
+      groupId: string,
+      groupType: GroupType,
+      identityCommitment: string
+    ): Promise<true | null> => {
       const adminWallet = getGroupAdmin(groupType)
-      
+
       if (!adminWallet) return null
 
       setLoading(true)
@@ -156,8 +175,19 @@ export default function useOnChainGroups(): ReturnParameters {
 
       const receipt = await provider.waitForTransaction(transaction.hash)
 
-      setTransactionStatus(!!receipt.status)
+      if (!!receipt.status) {
+        const config: AxiosRequestConfig = {
+          method: "patch",
+          data: {
+            groupId,
+            identityCommitment
+          }
+        }
 
+        await request("/api/groups", config)
+      }
+
+      setTransactionStatus(!!receipt.status)
       setEtherscanLink("https://kovan.etherscan.io/tx/" + transaction.hash)
       setLoading(false)
       return true
@@ -166,9 +196,13 @@ export default function useOnChainGroups(): ReturnParameters {
   )
 
   const leaveGroup = useCallback(
-    async (groupId: string, groupType: GroupType, IdentityCommitment: string): Promise<true | null> => {
+    async (
+      groupId: string,
+      groupType: GroupType,
+      IdentityCommitment: string
+    ): Promise<true | null> => {
       const adminWallet = getGroupAdmin(groupType)
-      
+
       if (!adminWallet) return null
 
       setLoading(true)
