@@ -1,8 +1,12 @@
-export type GroupType = {
+export interface Group {
   groupId: string
   name: string
   thumbnailImg: string
   contract: string
   memberCount: number
-  isPOH: boolean
+  groupType: GroupType
+}
+export enum GroupType {
+  POH = "POH",
+  GENERAL = "GENERAL"
 }

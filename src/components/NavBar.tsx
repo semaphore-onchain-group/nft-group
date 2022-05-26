@@ -7,7 +7,7 @@ import Toolbar from "@mui/material/Toolbar"
 import Box from "@mui/material/Box"
 import Button from "@mui/material/Button"
 import Link from "@mui/material/Link"
-import shortenAddress from "src/utils/shortenAddress"
+import shortenAddress from "src/utils/frontend/shortenAddress"
 import Tooltip from "@mui/material/Tooltip"
 import logo from "src/img/logo.png"
 

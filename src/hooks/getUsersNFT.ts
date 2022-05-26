@@ -2,7 +2,7 @@ import { useCallback, useState } from "react"
 import getNextConfig from "next/config"
 import { createAlchemyWeb3, Nft } from "@alch/alchemy-web3"
 import request from "./request"
-import { IGroup } from "src/models/group"
+import { Group, GroupType } from "src/types/group"
 
 const alchemyKey = getNextConfig().publicRuntimeConfig.alchemyKey
 const web3 = createAlchemyWeb3(
@@ -11,8 +11,8 @@ const web3 = createAlchemyWeb3(
 
 type ReturnParameters = {
   usersNftList: (account: string) => Promise<Nft[] | null>
-  checkUsersStatus: (account: string, grouptype: string ,nft: Nft) => Promise<boolean | null>
-  checkGroupsStatus: (grouptype: string, nft: Nft) => Promise<boolean| null>
+  checkUsersStatus: (account: string, grouptype: GroupType ,nft: Nft) => Promise<boolean | null>
+  checkGroupsStatus: (grouptype: GroupType, nft: Nft) => Promise<boolean| null>
   groupstatusMsg?: string
 }
 
@@ -39,8 +39,8 @@ export default function getUsersNFT(): ReturnParameters {
   )
 
   const checkUsersStatus = useCallback(
-    async (account: string, grouptype: string , nft: Nft): Promise<boolean | null> => {
-    if(grouptype === "poh")
+    async (account: string, groupType: GroupType , nft: Nft): Promise<boolean | null> => {
+    if(groupType === GroupType.POH)
       {
         const minted = await web3.alchemy.getAssetTransfers({
           fromBlock: "0x0",
@@ -53,7 +53,7 @@ export default function getUsersNFT(): ReturnParameters {
         return !!minted.transfers.length
       }
     //General nft time Holding check at least one day before the current time  
-    else if(grouptype === "general")
+    else if(groupType === GroupType.GENERAL)
       {
         const timestamp = (new Date(nft.timeLastUpdated)).getTime()
         const timespend_sec = Math.floor((Date.now() - timestamp)/1000)
@@ -71,40 +71,22 @@ export default function getUsersNFT(): ReturnParameters {
   )
 
   const checkGroupsStatus = useCallback(
-    async (grouptype: string, nft: Nft): Promise<boolean | null> => {
-      const response = await request('/api/groups') as IGroup[]
+    async (grouptype: GroupType, nft: Nft): Promise<boolean | null> => {
+      const response = await request('/api/groups') as Group[]
       const filteredResponse = response.filter(nftgroup => nftgroup.contract.includes(nft.contract.address))
-      
+
       if(filteredResponse.length > 1){
         setGroupStatusMsg("Both groups general and poh have already been created.")
         return false
       }
 
-      if(grouptype === "poh")
-      {
-        if(filteredResponse.length && filteredResponse.at(0)?.isPOH){
-          setGroupStatusMsg("poh group has already been created.")
-          return false
-        }else{
-          setGroupStatusMsg("you can create a poh group for this nft.")
-          return true
-        }
-      }
-      //General group
-      else if(grouptype === "general")
-      {
-        if(filteredResponse.length && !filteredResponse.at(0)?.isPOH){
-          setGroupStatusMsg("general group has already been created.")
-          return false
-        }else{
-          setGroupStatusMsg("you can create a general group for this nft.")
-          return true
-        }
-      }
-      else{
-        setGroupStatusMsg("unable to check group status.")
-        return false
-      }
+      const isGroupExist = filteredResponse.find(group => group.groupType === grouptype)
+      const message = isGroupExist
+        ? `${grouptype.toLowerCase()} group has already been created.`
+        : `you can create a ${grouptype.toLowerCase()} group for this nft.`
+
+      setGroupStatusMsg(message)
+      return !isGroupExist
     },[]
   )
 

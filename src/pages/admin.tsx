@@ -33,6 +33,7 @@ import { providers } from "ethers"
 import { useRouter } from "next/router"
 import getUsersNFT from "src/hooks/getUsersNFT"
 import { Nft } from "@alch/alchemy-web3"
+import { GroupType } from "src/types/group"
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -57,7 +58,7 @@ const Admin: NextPage = () => {
   const [_openFail, setOpenFail] = useState(false)
   const [_nft, setNft] = useState<Nft>()
   const [_nftlist, setNftList] = useState<Nft[]>([])
-  const [_groupType, setGroupType] = useState<string>("")
+  const [_groupType, setGroupType] = useState<GroupType>(GroupType.GENERAL)
 
   useEffect(() => {
     ; (async () => {
@@ -93,7 +94,7 @@ const Admin: NextPage = () => {
   }
 
   const selectGroupType = (event: SelectChangeEvent) => {
-    setGroupType(event.target.value)
+    setGroupType(event.target.value as GroupType)
   }
 
   const handleDialogOpen = () => {
@@ -110,7 +111,7 @@ const Admin: NextPage = () => {
   }
 
   const checkGroup = async () => {
-    if(_nft && await checkGroupsStatus(_groupType,_nft)){
+    if(_nft && await checkGroupsStatus(_groupType, _nft)){
       setOpenSuccess(true)
       handleNext()
     }
@@ -167,8 +168,8 @@ const Admin: NextPage = () => {
             <StepContent style={{ width: 400 }}>
               <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }}>
                 <RadioGroup value={_groupType} onChange={selectGroupType}>
-                  <FormControlLabel value="general" control={<Radio/>} label="General NFT"/>
-                  <FormControlLabel value="poh" control={<Radio/>} label="PoH(Proof of Humanity)"/>
+                  <FormControlLabel value={GroupType.GENERAL} control={<Radio/>} label="General NFT"/>
+                  <FormControlLabel value={GroupType.POH} control={<Radio/>} label="PoH(Proof of Humanity)"/>
                 </RadioGroup>
                 <Button onClick={checkGroup}>check&create</Button>
               </FormControl>

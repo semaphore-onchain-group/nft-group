@@ -1,34 +1,56 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { Box, Button, Container, Typography } from "@mui/material"
-import { GroupType } from "src/types/group"
 import { useRouter } from "next/router"
 import Image from "next/image"
 import logo from "src/img/logo.png"
+import { GroupType } from "src/types/group"
+
+interface Props {
+  groupId: string
+  name: string
+  thumbnailImg: string
+  groupType: GroupType
+}
 
 export default function Thumbnail({
   groupId,
   name,
-  thumbnailImg
-}: GroupType): JSX.Element {
+  thumbnailImg,
+  groupType
+}: Props): JSX.Element {
   const router = useRouter()
+  const [_groupTitle, setGroupTitle] = useState<string>(
+    name.length > 13 ? `${name.substring(0, 10)}...` : name
+  )
+  const [_borderColor, setBorderColor] = useState<string>()
+
+  useEffect(() => {
+    if (groupType === GroupType.POH) {
+      setBorderColor("orange")
+    } else {
+      setBorderColor("white")
+    }
+  }, [])
 
   return (
-    <Container>
-      <Box>
-        <Button
-          onClick={() => router.push(`/group/${groupId}`)}
-          sx={{ width: 150, height: 150, border: 1, color: "white" }}
-        >
-          {thumbnailImg ? (
-            <img src={thumbnailImg} alt={name} />
-          ) : (
-            <Image src={logo} alt={name} />
-          )}
-        </Button>
-        <Typography variant="body1" sx={{ textAlign: "center" }}>
-          {name}
-        </Typography>
-      </Box>
+    <Container sx={{ width: 200 }}>
+      <Button
+        onClick={() => router.push(`/group/${groupId}`)}
+        onMouseOver={() => setGroupTitle(name)}
+        onMouseOut={() =>
+          setGroupTitle(name.length > 13 ? `${name.substring(0, 10)}...` : name)
+        }
+        sx={{ width: 150, height: 150, border: 1, color: _borderColor }}
+      >
+        {thumbnailImg ? (
+          <img src={thumbnailImg} alt={name} />
+        ) : (
+          <Image src={logo} alt={name} />
+        )}
+      </Button>
+      <Typography variant="body1" sx={{ textAlign: "center" }}>
+        {_groupTitle}
+      </Typography>
     </Container>
   )
 }
