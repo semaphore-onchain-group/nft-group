@@ -21,10 +21,10 @@ import { useStyles, theme } from "src/styles"
 import request from "src/hooks/request"
 import getUsersNFT from "src/hooks/getUsersNFT"
 import { Group } from "src/types/group"
-import { AxiosRequestConfig } from "axios"
 import useOnChainGroups from "src/hooks/useOnChainGroups"
 import useSigner from "src/hooks/useSigner"
 import ConnectWalletInfo from "src/components/ConnectWalletInfo"
+import CircleImage from "src/components/CircleImage"
 
 type Props = Group
 
@@ -32,7 +32,7 @@ type Query = {
   groupId?: string
 }
 
-const GroupPage: NextPage<Props> = ({ contract, groupType }) => {
+const GroupPage: NextPage<Props> = ({ contract, groupType, thumbnailImg, name, memberCount }) => {
   const router = useRouter()
   const classes = useStyles()
   const { account } = useWeb3React<providers.Web3Provider>()
@@ -128,12 +128,16 @@ const GroupPage: NextPage<Props> = ({ contract, groupType }) => {
     <ThemeProvider theme={theme}>
       <Paper className={classes.container} elevation={0} square={true}>
         <Box className={classes.content}>
-          <Typography variant="h5">
+          <Typography variant="subtitle1">
             Semaphore On-chain NFT group
           </Typography>
-          <Typography variant="h2">
-            {groupId}
+          <Typography variant="h4">
+            {name}
           </Typography>
+          <Typography variant="subtitle1">
+            {memberCount} members
+          </Typography>
+          <CircleImage src={thumbnailImg} alt={name} />
           <Stepper activeStep={_activeStep} orientation="vertical">
             <Step>
               <StepLabel error={_error?.errorStep === 0}>
