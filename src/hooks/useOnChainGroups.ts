@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react"
 import { Signer, Contract, providers, Wallet, utils } from "ethers"
-import createIdentity from "src/utils/createIdentity"
+import createIdentity from "src/utils/frontend/createIdentity"
 import Semaphore_contract from "contract-artifacts/Semaphore.json"
 import onchainAPI from "./OnchainAPI"
 import getNextConfig from "next/config"
@@ -10,7 +10,7 @@ import request from "./request"
 import { AxiosRequestConfig } from "axios"
 import { Bytes32, Uint256 } from 'soltypes'
 import { GroupType } from "src/types/group"
-import { getGroupAdmin } from "src/utils/getGroupAdmin"
+import { getGroupAdmin } from "src/utils/frontend/getGroupAdmin"
 
 const provider = new providers.JsonRpcProvider(
   `https://kovan.infura.io/v3/${
