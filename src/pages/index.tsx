@@ -48,23 +48,28 @@ const Home: NextPage = () => {
     ; (async () => {
       const groupList = await getGroupList()
       setFullGroupList(groupList)
-      setGroupList(groupList)
     })()
   }, [])
 
   useEffect(() => {
-    const checkedGroups = (Object.keys(_checkedGroupsInfo) as GroupType[]).filter(key => _checkedGroupsInfo[key])
+    const checkedGroups =
+      (Object.keys(_checkedGroupsInfo) as GroupType[])
+        .filter(key => _checkedGroupsInfo[key])
 
-    setGroupList(_fullGroupList.filter(group => checkedGroups.includes(group.groupType)))
+    setGroupList(
+      _fullGroupList
+        .filter(group => checkedGroups.includes(group.groupType))
+        .sort((a, b) => b.memberCount - a.memberCount)
+    )
   }, [_checkedGroupsInfo, _fullGroupList])
 
   useEffect(() => {
     setGroupList(
       _fullGroupList.filter((group) =>
         group.name.toLowerCase().includes(_searchField.toLowerCase())
-      )
+      ).sort((a, b) => b.memberCount - a.memberCount)
     )
-  }, [_searchField])
+  }, [_searchField, _fullGroupList])
 
   return (
     <ThemeProvider theme={theme}>
