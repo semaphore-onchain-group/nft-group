@@ -1,15 +1,20 @@
 import React from "react"
 import { Box, Button, Container, Typography } from "@mui/material"
-import { GroupType } from "src/types/group"
 import { useRouter } from "next/router"
 import Image from "next/image"
 import logo from "src/img/logo.png"
+
+interface Props {
+  groupId: string
+  name: string
+  thumbnailImg: string
+}
 
 export default function Thumbnail({
   groupId,
   name,
   thumbnailImg
-}: GroupType): JSX.Element {
+}: Props): JSX.Element {
   const router = useRouter()
 
   return (
