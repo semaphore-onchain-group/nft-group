@@ -26,17 +26,16 @@ import getGroupList from "src/hooks/getGroupList"
 import AddBoxIcon from "@mui/icons-material/AddBox"
 import { useRouter } from "next/router"
 import React, { useEffect, useState } from "react"
-import { GroupType } from "src/types/group"
+import { Group, GroupType } from "src/types/group"
 import SearchIcon from "@mui/icons-material/Search"
 import { FilterList } from "@mui/icons-material"
 
 const Home: NextPage = () => {
   const router = useRouter()
   const classes = useStyles()
-  const [_fullGroupList, setFullGroupList] = useState<GroupType[]>([])
-  const [_groupList, setGroupList] = useState<GroupType[]>([])
-  const [_generalChecked, setGeneralChecked] = useState<boolean>(true)
-  const [_pohChecked, setPohChecked] = useState<boolean>(true)
+  const [_fullGroupList, setFullGroupList] = useState<Group[]>([])
+  const [_groupList, setGroupList] = useState<Group[]>([])
+  const [_checkedGroupsInfo, setCheckedGroupsInfo] = useState<Record<GroupType, boolean>>({ POH: true, GENERAL: true })
   const [_anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [_searchField, setSearchField] = useState<string>("")
   const openFilter = Boolean(_anchorEl)
@@ -46,7 +45,7 @@ const Home: NextPage = () => {
   }
 
   useEffect(() => {
-    ;(async () => {
+    ; (async () => {
       const groupList = await getGroupList()
       setFullGroupList(groupList)
       setGroupList(groupList)
@@ -54,16 +53,10 @@ const Home: NextPage = () => {
   }, [])
 
   useEffect(() => {
-    if (_generalChecked !== _pohChecked) {
-      setGroupList(
-        _fullGroupList.filter((group) => group.isPOH === _pohChecked)
-      )
-    } else if (_generalChecked && _pohChecked) {
-      setGroupList(_fullGroupList)
-    } else {
-      setGroupList([])
-    }
-  }, [_pohChecked, _generalChecked])
+    const checkedGroups = (Object.keys(_checkedGroupsInfo) as GroupType[]).filter(key => _checkedGroupsInfo[key])
+
+    setGroupList(_fullGroupList.filter(group => checkedGroups.includes(group.groupType)))
+  }, [_checkedGroupsInfo, _fullGroupList])
 
   useEffect(() => {
     setGroupList(
@@ -126,9 +119,9 @@ const Home: NextPage = () => {
                           control={
                             <Checkbox
                               defaultChecked
-                              checked={_generalChecked}
+                              checked={_checkedGroupsInfo[GroupType.GENERAL]}
                               onChange={(e) => {
-                                setGeneralChecked(e.target.checked)
+                                setCheckedGroupsInfo({ ..._checkedGroupsInfo, GENERAL: e.target.checked })
                               }}
                             />
                           }
@@ -140,9 +133,9 @@ const Home: NextPage = () => {
                           control={
                             <Checkbox
                               defaultChecked
-                              checked={_pohChecked}
+                              checked={_checkedGroupsInfo[GroupType.POH]}
                               onChange={(e) => {
-                                setPohChecked(e.target.checked)
+                                setCheckedGroupsInfo({ ..._checkedGroupsInfo, POH: e.target.checked })
                               }}
                             />
                           }
@@ -160,9 +153,6 @@ const Home: NextPage = () => {
                   groupId={group.groupId}
                   name={group.name}
                   thumbnailImg={group.thumbnailImg}
-                  contract={group.contract}
-                  memberCount={group.memberCount}
-                  isPOH={group.isPOH}
                 />
               </Grid>
             ))}
