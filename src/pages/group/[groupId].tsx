@@ -23,8 +23,8 @@ import getUsersNFT from "src/hooks/getUsersNFT"
 import { Group } from "src/types/group"
 import useOnChainGroups from "src/hooks/useOnChainGroups"
 import useSigner from "src/hooks/useSigner"
-import ConnectWalletInfo from "src/components/ConnectWalletInfo"
 import CircleImage from "src/components/CircleImage"
+
 
 type Props = Group
 
@@ -43,7 +43,7 @@ const GroupPage: NextPage<Props> = ({ contract, groupType, thumbnailImg, name, m
     { errorStep: number; message?: string } | undefined
   >()
   const [_identityCommitment, setIdentityCommitment] = useState<string>()
-  const { usersNftList } = getUsersNFT()
+  const { usersNftList, checkUsersStatus } = getUsersNFT()
   const _signer = useSigner()
   const {
     signMessage,
@@ -67,10 +67,17 @@ const GroupPage: NextPage<Props> = ({ contract, groupType, thumbnailImg, name, m
       }
 
       const nftList = await usersNftList(account)
-      const isOwnNft = nftList?.some(nft => nft.contract.address === contract)
+      const filteredResponse = nftList?.filter(nft => nft.contract.address.includes(contract))
 
-      if (!isOwnNft) {
+      if (!filteredResponse?.length) {
         setError({ errorStep: 0, message: "You don't have this group's Nft." })
+        setActiveStep(0)
+        return
+      }
+      const userStatus = await checkUsersStatus(account, groupType, filteredResponse)
+        
+      if (!userStatus) {
+        setError({ errorStep: 0, message: "You are not eligible to join this group.(check your NFT status)"})
         setActiveStep(0)
         return
       }
@@ -89,10 +96,7 @@ const GroupPage: NextPage<Props> = ({ contract, groupType, thumbnailImg, name, m
       setIdentityCommitment(identityCommitment)
       identityCommitment && setActiveStep(2)
     } catch (e) {
-      setError({
-        errorStep: _activeStep,
-        message: "generate identity Failed - " + e
-      })
+      setError({errorStep: _activeStep, message: "generate identity Failed - " + e })
     }
   }
 
@@ -201,11 +205,10 @@ const GroupPage: NextPage<Props> = ({ contract, groupType, thumbnailImg, name, m
               </StepContent>
             </Step>
           </Stepper>
-          {!account && <ConnectWalletInfo />}
           {_error && (
-            <Paper className={classes.results} sx={{ p: 3 }}>
+            <Paper className={classes.results}>
               {_error.message && (
-                <Typography variant="body1">{_error.message}</Typography>
+                <Typography variant="body1" sx={{ p: 3 }}>{_error.message}</Typography>
               )}
             </Paper>
           )}
