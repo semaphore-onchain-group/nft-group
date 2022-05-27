@@ -5,9 +5,7 @@ import {
   Box,
   Typography,
   Grid,
-  Container,
   Button,
-  Tooltip,
   Toolbar,
   Menu,
   MenuItem,
@@ -21,9 +19,7 @@ import {
   SearchIconWrapper,
   StyledInputBase
 } from "src/styles"
-import Thumbnail from "src/components/Thumbnail"
 import getGroupList from "src/hooks/getGroupList"
-import AddBoxIcon from "@mui/icons-material/AddBox"
 import { useRouter } from "next/router"
 import React, { useEffect, useState } from "react"
 import { Group, GroupType } from "src/types/group"
@@ -36,7 +32,7 @@ const Home: NextPage = () => {
   const classes = useStyles()
   const [_fullGroupList, setFullGroupList] = useState<Group[]>([])
   const [_groupList, setGroupList] = useState<Group[]>([])
-  const [_checkedGroupsInfo, setCheckedGroupsInfo] = useState<Record<GroupType, boolean>>({ POH: true, GENERAL: true })
+  const [_checkedGroupsInfo, setCheckedGroupsInfo] = useState<Record<GroupType, boolean>>({ POH: true, GENERAL: true, POAP: true })
   const [_anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [_searchField, setSearchField] = useState<string>("")
   const openFilter = Boolean(_anchorEl)
@@ -147,6 +143,20 @@ const Home: NextPage = () => {
                             />
                           }
                           label="PoH NFT group"
+                        />
+                      </MenuItem>
+                      <MenuItem>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              defaultChecked
+                              checked={_checkedGroupsInfo[GroupType.POAP]}
+                              onChange={(e) => {
+                                setCheckedGroupsInfo({ ..._checkedGroupsInfo, POAP: e.target.checked })
+                              }}
+                            />
+                          }
+                          label="POAP group"
                         />
                       </MenuItem>
                     </Menu>

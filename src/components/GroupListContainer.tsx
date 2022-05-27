@@ -1,11 +1,7 @@
-import React, { useEffect, useState } from "react"
-import { Box, Button, Container, Typography, Theme, Card, CardActionArea, CardContent, Grid } from "@mui/material"
-import { useRouter } from "next/router"
-import Image from "next/image"
-import logo from "src/img/logo.png"
-import { GroupType, Group } from "src/types/group"
+import React from "react"
+import { Box, Theme, Grid } from "@mui/material"
+import { Group } from "src/types/group"
 import { makeStyles, createStyles } from "@mui/styles"
-import Thumbnail from "./Thumbnail"
 import GroupCard from "./GroupCard"
 
 interface Props {
@@ -16,7 +12,8 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     container: {
       width: '100%',
-      alignSelf: 'center'
+      alignSelf: 'center',
+      marginBottom: 200
     },
     image: {
       width: 180,
@@ -35,7 +32,6 @@ export default function GroupListContainer({
   groupList
 }: Props): JSX.Element {
   const classes = useStyles()
-  const router = useRouter()
 
   return (
     <Box className={classes.container}>
