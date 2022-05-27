@@ -5,6 +5,7 @@ const { Schema } = mongoose
 
 interface IGroup extends GroupType {
   members: Array<string>
+  members2: Array<string>
 }
 
 const GroupSchema = new Schema<IGroup>({
@@ -13,7 +14,7 @@ const GroupSchema = new Schema<IGroup>({
   thumbnailImg: String,
   contract: String,
   groupType: String,
-  members: [{type: String, unique: true}]
+  members: { type: [String] },
 })
 
 const Group =
