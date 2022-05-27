@@ -52,7 +52,8 @@ export default function getUsersNFT(): ReturnParameters {
               contractAddresses:[nft.contract.address],
               excludeZeroValue: true
             })
-            if(!!minted.transfers.length){
+            if(!!minted.transfers.length)
+            {
               return true
             }
           }
@@ -70,7 +71,24 @@ export default function getUsersNFT(): ReturnParameters {
               }
           }
       }
-    
+    else if(groupType === GroupType.POAP)
+    {
+      for(const nft of nfts)
+        {
+          const minted = await web3.alchemy.getAssetTransfers({
+            fromBlock: "0x0",
+            fromAddress: "0x0000000000000000000000000000000000000000",
+            toAddress: account,
+            contractAddresses:[nft.contract.address],
+            excludeZeroValue: true
+          })
+          const checked = minted.transfers.filter(transfer => transfer.erc721TokenId?.includes(nft.id.tokenId))
+          if (checked.length)
+            {
+              return true
+            }
+        }
+    }
     return false
 
     },[]
@@ -78,21 +96,36 @@ export default function getUsersNFT(): ReturnParameters {
 
   const checkGroupsStatus = useCallback(
     async (grouptype: GroupType, nft: Nft): Promise<boolean | null> => {
-      const response = await request('/api/groups') as Group[]
-      const filteredResponse = response.filter(nftgroup => nftgroup.contract.includes(nft.contract.address))
+      if(grouptype===GroupType.POAP){
+        const response = await request('/api/groups') as Group[]
+        const filteredResponse = response.filter(nftgroup => nftgroup.contract.includes(nft.contract.address) && nftgroup.name.includes(nft.title))
 
-      if(filteredResponse.length > 1){
-        setGroupStatusMsg("Both groups general and poh have already been created.")
-        return false
+        if(filteredResponse.length === 0)
+        {
+          setGroupStatusMsg("This POAP group has already been created.")
+          return false
+        }
+        setGroupStatusMsg("you can create this POAP group.")
+        return true
       }
-
-      const isGroupExist = filteredResponse.find(group => group.groupType === grouptype)
-      const message = isGroupExist
-        ? `${grouptype.toLowerCase()} group has already been created.`
-        : `you can create a ${grouptype.toLowerCase()} group for this nft.`
-
-      setGroupStatusMsg(message)
-      return !isGroupExist
+      else
+      {
+        const response = await request('/api/groups') as Group[]
+        const filteredResponse = response.filter(nftgroup => nftgroup.contract.includes(nft.contract.address))
+  
+        if(filteredResponse.length > 1){
+          setGroupStatusMsg("Both groups general and poh have already been created.")
+          return false
+        }
+  
+        const isGroupExist = filteredResponse.find(group => group.groupType === grouptype)
+        const message = isGroupExist
+          ? `${grouptype.toLowerCase()} group has already been created.`
+          : `you can create a ${grouptype.toLowerCase()} group for this nft.`
+  
+        setGroupStatusMsg(message)
+        return !isGroupExist
+      }
     },[]
   )
 
