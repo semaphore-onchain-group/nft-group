@@ -86,7 +86,7 @@ export default function useOnChainGroups(): ReturnParameters {
       }
 
       if (groupType === GroupType.POAP) {
-        groupId = formatUint248String(nft.title)
+        groupId = formatUint248String(`${nft.title}_POAP`)
       }
 
       const transaction = await SemaphoreContract.connect(
