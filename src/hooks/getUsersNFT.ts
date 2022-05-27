@@ -106,7 +106,7 @@ export default function getUsersNFT(): ReturnParameters {
         const response = await request('/api/groups') as Group[]
         const filteredResponse = response.filter(nftgroup => nftgroup.contract.includes(nft.contract.address) && nftgroup.name.includes(nft.title))
 
-        if(filteredResponse.length === 0)
+        if (filteredResponse.length) 
         {
           setGroupStatusMsg("This POAP group has already been created.")
           return false
