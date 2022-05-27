@@ -8,6 +8,7 @@ const alchemyKey = getNextConfig().publicRuntimeConfig.alchemyKey
 const web3 = createAlchemyWeb3(
   `https://eth-mainnet.alchemyapi.io/v2/${alchemyKey}`
 )
+const ENS_ADDRESS = "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85"
 
 type ReturnParameters = {
   usersNftList: (account: string) => Promise<Nft[] | null>
@@ -25,6 +26,11 @@ export default function getUsersNFT(): ReturnParameters {
 
       const nftList = nfts.ownedNfts
         .map((nft) => {
+          if(nft.contract.address === ENS_ADDRESS)
+            {
+              const title = "Ethereum Name Service (ENS)"
+              return { ...nft, title }
+            }
           const title = nft.title.includes("#")
             ? nft.title.substring(0, nft.title.indexOf("#"))
             : nft.title
