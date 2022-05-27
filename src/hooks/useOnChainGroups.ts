@@ -8,9 +8,22 @@ import { generateMerkleProof } from "@zk-kit/protocols"
 import { Nft } from "@alch/alchemy-web3"
 import request from "./request"
 import { AxiosRequestConfig } from "axios"
-import { Bytes32, Uint256 } from "soltypes"
+import { Bytes31, Bytes32, Uint256 } from "soltypes"
+import { HashZero } from "@ethersproject/constants"
+import { toUtf8Bytes, concat, hexlify, formatBytes32String} from "ethers/lib/utils"
 import { GroupType } from "src/types/group"
 import { getGroupAdmin } from "src/utils/frontend/getGroupAdmin"
+
+function formatUint248String(text: string): string {
+  const bytes = toUtf8Bytes(text)
+
+  if (bytes.length > 30) {
+    throw new Error("byte31 string must be less than 31 bytes")
+  }
+
+  const hash = new Bytes31(hexlify(concat([bytes, HashZero]).slice(0, 31)))
+  return hash.toUint().toString()
+}
 
 const provider = new providers.JsonRpcProvider(
   `https://kovan.infura.io/v3/${
@@ -72,6 +85,10 @@ export default function useOnChainGroups(): ReturnParameters {
         groupId = (BigInt(groupId) + BigInt(flag)).toString()
       }
 
+      if (groupType === GroupType.POAP) {
+        groupId = formatUint248String(nft.title)
+      }
+
       const transaction = await SemaphoreContract.connect(
         adminWallet
       ).createGroup(groupId, DEPTH, adminWallet.address)
@@ -80,14 +97,20 @@ export default function useOnChainGroups(): ReturnParameters {
 
       if (!!receipt.status) {
         let img_url
-        await fetch(
-          `https://api.opensea.io/api/v1/asset_contract/${nft.contract.address}`,
-          { method: "GET" }
-        )
-          .then((response) => response.json())
-          .then((response) => (img_url = response.image_url))
-          .catch((err) => console.error(err))
-
+        if(groupType === GroupType.POAP)
+          {
+            img_url = nft.metadata?.image_url
+          }
+        else
+          {
+            await fetch(
+              `https://api.opensea.io/api/v1/asset_contract/${nft.contract.address}`,
+              { method: "GET" }
+            )
+              .then((response) => response.json())
+              .then((response) => (img_url = response.image_url))
+              .catch((err) => console.error(err))
+          }
         const config: AxiosRequestConfig = {
           method: "post",
           data: {

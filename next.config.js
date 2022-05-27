@@ -5,6 +5,7 @@ const nextConfig = {
     // Will be available on both server and client
     generalAdminPrivateKey: process.env.GENERAL_NFT_GROUP_ADMIN_PRIVATE_KEY,
     pohAdminPrivateKey: process.env.POH_NFT_GROUP_ADMIN_PRIVATE_KEY,
+    poapAdminPrivateKey: process.env.POAP_NFT_GROUP_ADMIN_PRIVATE_KEY,
     infuraApiKey: process.env.INFURA_API_KEY,
     alchemyKey: process.env.ALCHEMY_APIKEY,
     mongoURL: process.env.MONGO_URL,

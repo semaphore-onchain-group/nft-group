@@ -5,9 +5,7 @@ import {
   Box,
   Typography,
   Grid,
-  Container,
   Button,
-  Tooltip,
   Toolbar,
   Menu,
   MenuItem,
@@ -21,21 +19,20 @@ import {
   SearchIconWrapper,
   StyledInputBase
 } from "src/styles"
-import Thumbnail from "src/components/Thumbnail"
 import getGroupList from "src/hooks/getGroupList"
-import AddBoxIcon from "@mui/icons-material/AddBox"
 import { useRouter } from "next/router"
 import React, { useEffect, useState } from "react"
 import { Group, GroupType } from "src/types/group"
 import SearchIcon from "@mui/icons-material/Search"
 import { FilterList } from "@mui/icons-material"
+import GroupListContainer from "src/components/GroupListContainer"
 
 const Home: NextPage = () => {
   const router = useRouter()
   const classes = useStyles()
   const [_fullGroupList, setFullGroupList] = useState<Group[]>([])
   const [_groupList, setGroupList] = useState<Group[]>([])
-  const [_checkedGroupsInfo, setCheckedGroupsInfo] = useState<Record<GroupType, boolean>>({ POH: true, GENERAL: true })
+  const [_checkedGroupsInfo, setCheckedGroupsInfo] = useState<Record<GroupType, boolean>>({ POH: true, GENERAL: true, POAP: true })
   const [_anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [_searchField, setSearchField] = useState<string>("")
   const openFilter = Boolean(_anchorEl)
@@ -80,6 +77,7 @@ const Home: NextPage = () => {
           </Typography>
 
           <Grid container spacing={10} sx={{ mb: 20 }}>
+
             <Grid item xs={12}>
               <Toolbar>
                 <Grid container spacing={1}>
@@ -147,34 +145,27 @@ const Home: NextPage = () => {
                           label="PoH NFT group"
                         />
                       </MenuItem>
+                      <MenuItem>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              defaultChecked
+                              checked={_checkedGroupsInfo[GroupType.POAP]}
+                              onChange={(e) => {
+                                setCheckedGroupsInfo({ ..._checkedGroupsInfo, POAP: e.target.checked })
+                              }}
+                            />
+                          }
+                          label="POAP group"
+                        />
+                      </MenuItem>
                     </Menu>
                   </Grid>
                 </Grid>
               </Toolbar>
             </Grid>
-            {_groupList.map((group) => (
-              <Grid key={group.groupId} item xs={3}>
-                <Thumbnail
-                  groupId={group.groupId}
-                  name={group.name}
-                  thumbnailImg={group.thumbnailImg}
-                  groupType={group.groupType}
-                />
-              </Grid>
-            ))}
-            <Grid item xs={3}>
-              <Container>
-                <Tooltip title="Create new group" placement="bottom">
-                  <Button
-                    onClick={() => router.push("/admin")}
-                    sx={{ width: 150, height: 150, color: "gray", border: 1 }}
-                  >
-                    <AddBoxIcon sx={{ width: 150, height: 150 }} />
-                  </Button>
-                </Tooltip>
-              </Container>
-            </Grid>
           </Grid>
+          <GroupListContainer groupList={_groupList} />
         </Box>
       </Paper>
     </ThemeProvider>

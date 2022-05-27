@@ -59,6 +59,7 @@ const Admin: NextPage = () => {
   const [_nft, setNft] = useState<Nft>()
   const [_nftlist, setNftList] = useState<Nft[]>([])
   const [_groupType, setGroupType] = useState<GroupType>(GroupType.GENERAL)
+  const [_isPoap, setIsPoap] = useState<boolean>()
 
   useEffect(() => {
     ; (async () => {
@@ -76,6 +77,14 @@ const Admin: NextPage = () => {
       }
     })()
   }, [_activeStep, account])
+
+  useEffect(() => {
+    if(_nft?.contract.address ==="0x22c1f6050e56d2876009903609a2cc3fef83b415") {
+      setIsPoap(true)
+    } else {
+      setIsPoap(false)
+    }
+  },[_nft])
 
   const handleNext = () => {
     setActiveStep((prevActiveStep: number) => prevActiveStep + 1)
@@ -168,8 +177,9 @@ const Admin: NextPage = () => {
             <StepContent style={{ width: 400 }}>
               <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }}>
                 <RadioGroup value={_groupType} onChange={selectGroupType}>
-                  <FormControlLabel value={GroupType.GENERAL} control={<Radio/>} label="General NFT"/>
-                  <FormControlLabel value={GroupType.POH} control={<Radio/>} label="PoH(Proof of Humanity)"/>
+                  <FormControlLabel disabled={_isPoap} value={GroupType.GENERAL} control={<Radio/>} label="General NFT"/>
+                  <FormControlLabel disabled={_isPoap} value={GroupType.POH} control={<Radio/>} label="PoH(Proof of Humanity)"/>
+                  <FormControlLabel disabled={!_isPoap} value={GroupType.POAP} control={<Radio/>} label="POAP"/>
                 </RadioGroup>
                 <Button onClick={checkGroup}>check&create</Button>
               </FormControl>

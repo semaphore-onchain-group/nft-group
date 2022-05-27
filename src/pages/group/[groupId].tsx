@@ -20,7 +20,7 @@ import { LoadingButton } from "@mui/lab"
 import { useStyles, theme } from "src/styles"
 import request from "src/hooks/request"
 import getUsersNFT from "src/hooks/getUsersNFT"
-import { Group } from "src/types/group"
+import { Group, GroupType } from "src/types/group"
 import useOnChainGroups from "src/hooks/useOnChainGroups"
 import useSigner from "src/hooks/useSigner"
 import CircleImage from "src/components/CircleImage"
@@ -67,7 +67,9 @@ const GroupPage: NextPage<Props> = ({ contract, groupType, thumbnailImg, name, m
       }
 
       const nftList = await usersNftList(account)
-      const filteredResponse = nftList?.filter(nft => nft.contract.address.includes(contract))
+      const filteredResponse = (groupType === GroupType.POAP)
+        ? nftList?.filter(nft => nft.title.includes(name) && nft.contract.address.includes(contract))
+        : nftList?.filter(nft => nft.contract.address.includes(contract))
 
       if (!filteredResponse?.length) {
         setError({ errorStep: 0, message: "You don't have this group's Nft." })
