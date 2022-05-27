@@ -184,7 +184,7 @@ const GroupPage: NextPage<Props> = ({ contract, groupType, thumbnailImg, name, m
                       </Link>
                       )
                     </Typography>
-                    <Button fullWidth onClick={window.location.reload} variant="outlined">
+                    <Button fullWidth onClick={()=>router.push("/")} variant="outlined">
                       Home
                     </Button>
                   </Box>

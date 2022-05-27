@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import { Box, Button, Container, Typography } from "@mui/material"
+import { Button, Container, Typography } from "@mui/material"
 import { useRouter } from "next/router"
 import Image from "next/image"
 import logo from "src/img/logo.png"
@@ -48,7 +48,7 @@ export default function Thumbnail({
           <Image src={logo} alt={name} />
         )}
       </Button>
-      <Typography variant="body1" sx={{ textAlign: "center" }}>
+      <Typography variant="body1" align="center">
         {_groupTitle}
       </Typography>
     </Container>
