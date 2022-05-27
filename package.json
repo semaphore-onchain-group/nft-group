@@ -9,14 +9,25 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@alch/alchemy-web3": "^1.4.2",
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
     "@mui/icons-material": "^5.6.2",
+    "@mui/lab": "^5.0.0-alpha.82",
     "@mui/material": "^5.7.0",
     "@mui/styles": "^5.7.0",
+    "@web3-react/core": "^6.1.9",
+    "@web3-react/injected-connector": "^6.0.7",
+    "@zk-kit/identity": "^1.4.1",
+    "@zk-kit/protocols": "^1.11.1",
+    "axios": "^0.27.2",
+    "ethers": "^5.6.6",
+    "mongoose": "^6.3.4",
     "next": "12.1.6",
+    "next-connect": "^0.12.2",
     "react": "18.1.0",
-    "react-dom": "18.1.0"
+    "react-dom": "18.1.0",
+    "soltypes": "^2.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.17.12",

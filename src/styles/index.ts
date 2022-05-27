@@ -1,5 +1,7 @@
-import { Theme } from "@mui/material/styles";
-import { createStyles, makeStyles } from "@mui/styles";
+import { Theme } from "@mui/material/styles"
+import { createStyles, makeStyles } from "@mui/styles"
+import theme from "./theme"
+import { Search, SearchIconWrapper, StyledInputBase } from "./searchBar"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -35,4 +37,4 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-export default useStyles
+export { useStyles, theme, Search, SearchIconWrapper, StyledInputBase }
