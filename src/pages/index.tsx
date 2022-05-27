@@ -29,6 +29,7 @@ import React, { useEffect, useState } from "react"
 import { Group, GroupType } from "src/types/group"
 import SearchIcon from "@mui/icons-material/Search"
 import { FilterList } from "@mui/icons-material"
+import GroupListContainer from "src/components/GroupListContainer"
 
 const Home: NextPage = () => {
   const router = useRouter()
@@ -80,6 +81,7 @@ const Home: NextPage = () => {
           </Typography>
 
           <Grid container spacing={10} sx={{ mb: 20 }}>
+
             <Grid item xs={12}>
               <Toolbar>
                 <Grid container spacing={1}>
@@ -152,29 +154,8 @@ const Home: NextPage = () => {
                 </Grid>
               </Toolbar>
             </Grid>
-            {_groupList.map((group) => (
-              <Grid key={group.groupId} item xs={3}>
-                <Thumbnail
-                  groupId={group.groupId}
-                  name={group.name}
-                  thumbnailImg={group.thumbnailImg}
-                  groupType={group.groupType}
-                />
-              </Grid>
-            ))}
-            <Grid item xs={3}>
-              <Container>
-                <Tooltip title="Create new group" placement="bottom">
-                  <Button
-                    onClick={() => router.push("/admin")}
-                    sx={{ width: 150, height: 150, color: "gray", border: 1 }}
-                  >
-                    <AddBoxIcon sx={{ width: 150, height: 150 }} />
-                  </Button>
-                </Tooltip>
-              </Container>
-            </Grid>
           </Grid>
+          <GroupListContainer groupList={_groupList} />
         </Box>
       </Paper>
     </ThemeProvider>
