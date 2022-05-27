@@ -7,6 +7,7 @@ export interface Group {
   groupType: GroupType
 }
 export enum GroupType {
+  GENERAL = "GENERAL",
   POH = "POH",
-  GENERAL = "GENERAL"
+  POAP = "POAP"
 }
