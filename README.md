@@ -1,34 +1,62 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+<p align="center">
+    <h1 align="center">
+        Semaphore NFT group
+    </h1>
+    <p align="center">Semaphore NFT onchain group open platform</p>
+</p>
 
-## Getting Started
+<br>
+This is a page where you can create and join/leave Semaphore NFT on-chain groups.<br>
+Users can join the Semaphore NFT group via holding NFT and can prove that they are the member of the group without revealing their identity. You can create a group with any type of NFT in your wallet, and once a group is created, other users holding that NFT can join the group.<br>
+By generating a semaphore membership proof, members of the group can prove that they own the NFT without exposing their wallet address. If it is a mint NFT through Proof of Humanity certification, it can be used for apps that need to prevent sybil attacks like quadratic funding.
+<br>
+<br>
 
-First, run the development server:
+Semaphore NFT group page: https://nft-group.vercel.app/
+
+Documents: https://nft-group-docs.vercel.app/
+
+---
+
+## contract
+Deployed contracts
+|                | Kovan                                                                                          |
+| -------        | ---------------------------------------------------------------------------------------------- |
+| Semaphore        | [0x1972...8793](https://kovan.etherscan.io/address/0x19722446e775d86f2585954961E23771d8758793) |
+
+<br>
+You need to deploy semphore contract first.<br>
+
+Find more details in the [semaphore repo](https://github.com/semaphore-protocol/semaphore) and [semaphore docs](https://semaphore.appliedzkp.org/)
+
+---
+
+## Install
+
+Clone this repository and install the dependencies:
 
 ```bash
-npm run dev
-# or
-yarn dev
+git clone https://github.com/semaphore-onchain-group/nft-group.git
+cd nft-group
+yarn # or `npm i`
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+## Usage
+Copy the .env.example file and rename it .env.
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+All environment variables need to be provided.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+### Running test
 
-## Learn More
+```bash
+yarn test
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Running page locally
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+run `yarn dev` (or `npm run dev`)
+```bash
+yarn dev
+```
