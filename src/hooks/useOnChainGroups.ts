@@ -8,9 +8,9 @@ import { generateMerkleProof } from "@zk-kit/protocols"
 import { Nft } from "@alch/alchemy-web3"
 import request from "./request"
 import { AxiosRequestConfig } from "axios"
-import { Bytes31, Bytes32, Uint256 } from "soltypes"
+import { Bytes31, Bytes32 } from "soltypes"
 import { HashZero } from "@ethersproject/constants"
-import { toUtf8Bytes, concat, hexlify, formatBytes32String} from "ethers/lib/utils"
+import { toUtf8Bytes, concat, hexlify } from "ethers/lib/utils"
 import { GroupType } from "src/types/group"
 import { getGroupAdmin } from "src/utils/frontend/getGroupAdmin"
 
@@ -23,6 +23,10 @@ function formatUint248String(text: string): string {
 
   const hash = new Bytes31(hexlify(concat([bytes, HashZero]).slice(0, 31)))
   return hash.toUint().toString()
+}
+
+function truncateText(text: string, maxlength: number ) :string {
+  return (text.length > maxlength)? text.slice(0, maxlength - 2) + '..' : text
 }
 
 const provider = new providers.JsonRpcProvider(
@@ -86,7 +90,7 @@ export default function useOnChainGroups(): ReturnParameters {
       }
 
       if (groupType === GroupType.POAP) {
-        groupId = formatUint248String(`${nft.title}_POAP`)
+        groupId = formatUint248String(truncateText(`POAP_${nft.title}`, 30))
       }
 
       const transaction = await SemaphoreContract.connect(
