@@ -4,7 +4,6 @@ import { ThemeProvider } from "@mui/material/styles"
 import { useRouter } from "next/router"
 import { useWeb3React } from "@web3-react/core"
 import { providers } from "ethers"
-
 import {
   Paper,
   Box,
@@ -15,9 +14,11 @@ import {
   Step,
   StepContent,
   Link,
+  Snackbar,
 } from "@mui/material"
 import { LoadingButton } from "@mui/lab"
 import { useStyles, theme } from "src/styles"
+import MuiAlert, { AlertProps } from "@mui/material/Alert"
 import request from "src/hooks/request"
 import getUsersNFT from "src/hooks/getUsersNFT"
 import { Group, GroupType } from "src/types/group"
@@ -25,6 +26,12 @@ import useOnChainGroups from "src/hooks/useOnChainGroups"
 import useSigner from "src/hooks/useSigner"
 import CircleImage from "src/components/CircleImage"
 
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  props,
+  ref,
+  ){
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props}/>
+  })
 
 type Props = Group
 
@@ -42,6 +49,7 @@ const GroupPage: NextPage<Props> = ({ contract, groupType, thumbnailImg, name, m
   const [_error, setError] = useState<
     { errorStep: number; message?: string } | undefined
   >()
+  const [_openWarning, setOpenWarning] = useState(false)
   const [_identityCommitment, setIdentityCommitment] = useState<string>()
   const { usersNftList, checkUsersStatus } = getUsersNFT()
   const _signer = useSigner()
@@ -66,27 +74,38 @@ const GroupPage: NextPage<Props> = ({ contract, groupType, thumbnailImg, name, m
         return
       }
 
-      const nftList = await usersNftList(account)
-      const filteredResponse = (groupType === GroupType.POAP)
-        ? nftList?.filter(nft => nft.title.includes(name) && nft.contract.address.includes(contract))
-        : nftList?.filter(nft => nft.contract.address.includes(contract))
+      if(_activeStep === 1 && account){
+        const nftList = await usersNftList(account)
+        const filteredResponse = (groupType === GroupType.POAP)
+          ? nftList?.filter(nft => nft.title.includes(name) && nft.contract.address.includes(contract))
+          : nftList?.filter(nft => nft.contract.address.includes(contract))
 
-      if (!filteredResponse?.length) {
-        setError({ errorStep: 0, message: "You don't have this group's Nft." })
-        setActiveStep(0)
-        return
-      }
-      const userStatus = await checkUsersStatus(account, groupType, filteredResponse)
-        
-      if (!userStatus) {
-        setError({ errorStep: 0, message: "You are not eligible to join this group.(check your NFT status)"})
-        setActiveStep(0)
-        return
-      }
+        if (!filteredResponse?.length) {
+          if(hasjoined) {
+            setOpenWarning(true)
+            setActiveStep(2)
+            return
+          }
+          setError({ errorStep: 1, message: "You don't have this group's Nft." })
+          setActiveStep(1)
+          return
+        }
+        const userStatus = await checkUsersStatus(account, groupType, filteredResponse)
+          
+        if (!userStatus) {
+          setError({ errorStep: 1, message: "You are not eligible to join this group.(check your NFT status)"})
+          setActiveStep(1)
+          return
+        }
 
-      setActiveStep(1)
+        setActiveStep(2)
+      }
     })()
-  }, [account])
+  }, [_activeStep, account])
+
+  const handleAlertClose = () => {
+    setOpenWarning(false)
+  }
 
   const generateIdentity = async () => {
     try {
@@ -96,7 +115,7 @@ const GroupPage: NextPage<Props> = ({ contract, groupType, thumbnailImg, name, m
       if (!identityCommitment) return
 
       setIdentityCommitment(identityCommitment)
-      identityCommitment && setActiveStep(2)
+      identityCommitment && setActiveStep(1)
     } catch (e) {
       setError({errorStep: _activeStep, message: "generate identity Failed - " + e })
     }
@@ -147,16 +166,6 @@ const GroupPage: NextPage<Props> = ({ contract, groupType, thumbnailImg, name, m
           <Stepper activeStep={_activeStep} orientation="vertical">
             <Step>
               <StepLabel error={_error?.errorStep === 0}>
-                Check NFT ownership
-              </StepLabel>
-              <StepContent style={{ width: 400 }}>
-                <Paper sx={{ p: 3 }}>
-                  To join this group, you have to possess the Nft.
-                </Paper>
-              </StepContent>
-            </Step>
-            <Step>
-              <StepLabel error={_error?.errorStep === 1}>
                 Generate your Semaphore identity
               </StepLabel>
               <StepContent style={{ width: 400 }}>
@@ -167,6 +176,16 @@ const GroupPage: NextPage<Props> = ({ contract, groupType, thumbnailImg, name, m
                 >
                   Generate Identity
                 </Button>
+              </StepContent>
+            </Step>
+            <Step>
+              <StepLabel error={_error?.errorStep === 1}>
+                Check NFT ownership
+              </StepLabel>
+              <StepContent style={{ width: 400 }}>
+                <Paper sx={{ p: 3 }}>
+                  To join this group, you have to possess the Nft.
+                </Paper>
               </StepContent>
             </Step>
             <Step>
@@ -214,6 +233,9 @@ const GroupPage: NextPage<Props> = ({ contract, groupType, thumbnailImg, name, m
               )}
             </Paper>
           )}
+          <Snackbar anchorOrigin={{vertical:"bottom",horizontal:"center"}} open={_openWarning} autoHideDuration={5000} onClose={handleAlertClose}>
+            <Alert severity="warning" sx={{width:'100%'}}>Warning: You should leave this group because you don't have nft</Alert>
+          </Snackbar>
         </Box>
       </Paper>
     </ThemeProvider>
