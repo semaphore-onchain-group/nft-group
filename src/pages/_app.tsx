@@ -6,6 +6,7 @@ import { ThemeProvider } from "@mui/material/styles"
 import { theme } from "src/styles"
 import NavBar from "src/components/NavBar"
 import { providers } from "ethers"
+import Footer from "src/components/Footer"
 
 function MyApp({ Component, pageProps }: AppProps) {
   function getLibrary(provider: any) {
@@ -25,6 +26,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         <ThemeProvider theme={theme}>
           <NavBar />
           <Component {...pageProps} />
+          <Footer />
         </ThemeProvider>
       </Web3ReactProvider>
     </>
