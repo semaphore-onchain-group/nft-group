@@ -1,9 +1,7 @@
 import Group from "src/models/group"
 import { NextApiRequest, NextApiResponse } from "next"
-import { connectToDatabase } from "src/utils/backend/mongodb"
 
 export const write = async (req: NextApiRequest, res: NextApiResponse) => {
-  await connectToDatabase()
   const group = new Group(req.body)
 
   try {
@@ -16,7 +14,6 @@ export const write = async (req: NextApiRequest, res: NextApiResponse) => {
 }
 
 export const list = async (req: NextApiRequest, res: NextApiResponse) => {
-  await connectToDatabase()
   const groups = (await Group.find().exec()).map((group) => ({
     ...group._doc,
     memberCount: group.members?.length
@@ -26,7 +23,6 @@ export const list = async (req: NextApiRequest, res: NextApiResponse) => {
 }
 
 export const read = async (req: NextApiRequest, res: NextApiResponse) => {
-  await connectToDatabase()
   const groupId = req.query.groupId
   const group = await Group.findOne({ groupId }).exec()
 
@@ -36,7 +32,6 @@ export const read = async (req: NextApiRequest, res: NextApiResponse) => {
 }
 
 export const update = async (req: NextApiRequest, res: NextApiResponse) => {
-  await connectToDatabase()
   const { groupId, identityCommitment } = req.body
 
   try {
